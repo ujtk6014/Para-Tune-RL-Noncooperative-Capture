@@ -6,7 +6,7 @@ import torch
 from gym import wrappers 
 import numpy as np
 from tqdm import tqdm
-
+import datetime
 
 from network import DDQNAgent
 from utils import *
@@ -28,11 +28,10 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max
     actor_lr = actor_lr
     learning_rate = 1e-3
 
-    # agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps)
-    # agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
+    agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
     #学習済みモデルを使うとき
-    curr_dir = os.path.abspath(os.getcwd())
-    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
+    # curr_dir = os.path.abspath(os.getcwd())
+    # agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
     episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size)
 
     #-------------------plot settings------------------------------
@@ -52,7 +51,10 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max
     plt.ylabel("Reward")
     plt.show()
 
+    date = datetime.datetime.now()
+    date = '{0:%Y%m%d}'.format(date)
     curr_dir = os.path.abspath(os.getcwd())
+    plt.savefig(curr_dir + "/results/reward/dqn/plot_reward_"+ date + ".png")
     if not os.path.isdir("models"):
         os.mkdir("models")
     torch.save(agent, curr_dir + "/models/spacecraft_control_ddqn.pkl")
