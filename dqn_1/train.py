@@ -28,10 +28,10 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max
     actor_lr = actor_lr
     learning_rate = 1e-3
 
-    agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
+    # agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
     #学習済みモデルを使うとき
-    # curr_dir = os.path.abspath(os.getcwd())
-    # agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
+    curr_dir = os.path.abspath(os.getcwd())
+    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
     episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size)
 
     #-------------------plot settings------------------------------
