@@ -294,7 +294,8 @@ class SatelliteContinuousEnv(gym.Env):
             #状態と入力を抑えたい
             # reward = -(self.q_weight*((1-qe_new[0])**2) + self.w_weight/0.25*omega_new@omega_new + self.action_weight/0.04*action@action) 
             # reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-            reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(omega_new@omega_new))
+            pre = np.rad2deg(omega_new)
+            reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
             # if omega@omega < self.omega_thre and qe_new[0] >= self.angle_thre:
             #     reward = 0.1
             # elif qe_new[0] >= self.angle_thre:
@@ -338,7 +339,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.uniform(1, high=3)
+        self.multi = 3 #np.random.uniform(1, high=3)
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
