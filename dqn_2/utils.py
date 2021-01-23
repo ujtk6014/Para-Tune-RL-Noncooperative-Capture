@@ -95,7 +95,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                     D[8,8] += D_delta * para[3]
                     para = np.empty((4,1))
                     if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
-                        env.neg_param_flag = True
+                        env.neg_param_flag = False
                     W = state[4:7]
                     x1 = state[1:4]
                     x2 = alpha*x1 + W
