@@ -68,7 +68,7 @@ class DDQNAgent:
         self.replay_buffer = BasicBuffer(buffer_maxlen)
     
     def get_action(self, state, episode=0):
-        epsilon = 0.2#0.5 *( 1/(0.1*episode + 1) )
+        epsilon = 0.1#0.5 *( 1/(0.1*episode + 1) )
         state = torch.FloatTensor(state.flatten()).unsqueeze(0).to(self.device)
         actions = self.q_net(state)
         # if self.train == True:
