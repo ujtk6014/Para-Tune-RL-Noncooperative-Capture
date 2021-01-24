@@ -146,13 +146,13 @@ class SatelliteContinuousEnv(gym.Env):
         self.est_th = np.diag(self.inertia)
 
         #シミュレーションパラメータ　
-        self.dt = 0.01 
+        self.dt = 0.1 
         self.simutime =30
         
         #報酬パラメータ
-        self.q_weight =  1
-        self.w_weight = 1
-        self.action_weight = 1
+        self.q_weight =  1*0.6
+        self.w_weight = 1.5*1.2
+        self.action_weight = 0.25*0.5
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -224,6 +224,11 @@ class SatelliteContinuousEnv(gym.Env):
         # self.pre_state = [self.startQuate,self.startOmega]
         # self.state = [self.errorQuate,self.d_errorQuate, self.startOmega]
 
+        #報酬系
+        self.r1 = 0
+        self.r2 = 0
+        self.r3 = 0
+
         #シミュレーション終了条件
         self.neg_param_flag = False
 
@@ -293,9 +298,12 @@ class SatelliteContinuousEnv(gym.Env):
             # reward += -0.01
             #状態と入力を抑えたい
             # reward = -(self.q_weight*((1-qe_new[0])**2) + self.w_weight/0.25*omega_new@omega_new + self.action_weight/0.04*action@action) 
-            # reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-            pre = np.rad2deg(omega_new)
-            reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
+            self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
+            self.r2 = self.w_weight*omega_new@omega_new
+            self.r3 = self.action_weight*action@action
+            reward = -(self.r1 + self.r2 + self.r3) 
+            # pre = np.rad2deg(omega_new)
+            # reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
             # if omega@omega < self.omega_thre and qe_new[0] >= self.angle_thre:
             #     reward = 0.1
             # elif qe_new[0] >= self.angle_thre:

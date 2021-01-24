@@ -12,7 +12,7 @@ from network import DDQNAgent
 from utils import *
 
 
-def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max_steps=3000, gamma=0.99, tau=1e-3,
+def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max_steps=300, gamma=0.99, tau=1e-3,
           buffer_maxlen=100000):
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
@@ -28,10 +28,10 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max
     actor_lr = actor_lr
     learning_rate = 1e-3
 
-    # agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
+    agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
     #学習済みモデルを使うとき
-    curr_dir = os.path.abspath(os.getcwd())
-    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
+    # curr_dir = os.path.abspath(os.getcwd())
+    # agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
     episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size)
 
     #-------------------plot settings------------------------------
@@ -73,10 +73,11 @@ def evaluate():
 
     state = env.reset()
     print("The goal angle is :" + str(np.rad2deg(env.goalEuler)) +"\n")
-    r = 0
+    total_r = 0
     qe = np.empty((0,4))
     q = np.empty((0,4))
     w = np.empty((0,3))
+    r = np.empty((0,1))
     k_hist = np.empty((0,1))
     D_hist = np.empty((0,3))
     actions = np.empty((0,1))
@@ -88,14 +89,14 @@ def evaluate():
     alpha = 0.5
     k = 0.8
     D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
-    max_steps = 3000
-    dt = 0.01
+    dt = env.dt
     simutime = 30
+    max_steps = simutime/dt
     simulation_iterations = int(simutime/dt)  # dt is 0.01
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
         for step, ch in enumerate(pbar):
-            if step % 20 == 0:
+            if step % 5 == 0:
                 action = agent.get_action(state)
                 n= str(Base_10_to_n(action,3))
                 while len(n) < 4:
@@ -138,10 +139,11 @@ def evaluate():
             q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
             qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
             w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
-            r += reward
+            total_r += reward
             d_tmp = np.array([D[0,0],D[4,4],D[8,8]])
             k_hist = np.append(k_hist, k.reshape(1,-1),axis=0)
             actions = np.append(actions, action.reshape(1,-1),axis=0)
+            r_hist = np.append(r_hist, reward.reshape(1,-1),axis=0)
             inputs = np.append(inputs, input.reshape(1,-1),axis=0)
             D_hist = np.append(D_hist, d_tmp.reshape(1,-1),axis=0)
             state = next_error_state
@@ -149,7 +151,7 @@ def evaluate():
     env.close()
     #-------------------------------結果のプロット----------------------------------
     #show the total reward
-    print("Total Reward is : " + str(r))
+    print("Total Reward is : " + str(total_r))
     # データの形の整理
     q = q.reshape([-1,4])
     qe = qe.reshape([-1,4])
@@ -170,6 +172,7 @@ def evaluate():
     tate = 2.0
     yoko = 4.0
     #------------------------------------------------
+    
     plt.figure(figsize=(yoko,tate),dpi=100)
     plt.plot(np.arange(simulation_iterations)*dt, q[:,0],label =r"$q_{0}$")
     plt.plot(np.arange(simulation_iterations)*dt, q[:,1],label =r"$q_{1}$")
@@ -259,6 +262,16 @@ def evaluate():
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/dqn_eval/plot_action.png")
+
+    plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.plot(np.arange(simulation_iterations)*dt, r_hist[:,0],label = r"$reward$")
+    # plt.title('Action')
+    plt.ylabel('reward')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    plt.savefig(curr_dir + "/results/dqn_eval/plot_reward.png")
     
 
     plt.show()
@@ -408,11 +421,12 @@ def env_adaptive():
 
     curr_dir = os.path.abspath(os.getcwd())
     env.reset()
-    r = 0
+    total_r = 0
     qe = np.empty((0,4))
     q = np.empty((0,4))
     w = np.empty((0,3))
     actions = np.empty((0,3))
+    r_hist = np.empty((0,3))
 
     #----------------------control parameters----------------------------
     alpha = 0.5
@@ -425,8 +439,8 @@ def env_adaptive():
     action = np.array([0,0,0]).reshape(1,3)
     actions = np.append(actions, action,axis=0)
 
-    dt = 0.01
-    simulation_iterations = int(30/0.01) -1 # dt is 0.01
+    dt = env.dt
+    simulation_iterations = int(30/dt) -1 # dt is 0.01
 
     for i in range(1, simulation_iterations):
         action = np.squeeze(action)
@@ -441,7 +455,8 @@ def env_adaptive():
         q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
         qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
         w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
-        r += reward
+        r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3]).reshape(1,-1),axis=0)
+        total_r += reward
     #----------------control law (Adaptive controller)-----------------------
         W = next_error_state[8:11]
         x1 = next_error_state[1:4]
@@ -459,7 +474,7 @@ def env_adaptive():
 
     # env.close()
     #show the total reward
-    print("Total Reward is : " + str(r))
+    print("Total Reward is : " + str(total_r))
     # データの形の整理
     q = q.reshape([-1,4])
     qe = qe.reshape([-1,4])
@@ -551,6 +566,20 @@ def env_adaptive():
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/adap_test/plot_angle.png")
+    
+    plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
+    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
+    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
+    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,0]+r_hist[:,1]+r_hist[:,2],label = r"$toal$",linestyle='dotted')
+    # plt.title('Action')
+    plt.ylabel('reward')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    plt.legend()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    plt.savefig(curr_dir + "/results/dqn_eval/plot_reward.png")
     plt.show()    
 
 if __name__ == '__main__':
