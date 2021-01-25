@@ -221,7 +221,7 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/dqn_eval/plot_torque.png")
 
-    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
+    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps)])
     angle = angle.reshape([-1,3])
     plt.figure(figsize=(yoko,tate),dpi=100)
     plt.plot(np.arange(max_steps)*dt, angle[:,0],label = r"$\phi$")
