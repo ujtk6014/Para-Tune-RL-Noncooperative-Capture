@@ -101,7 +101,7 @@ class DDQNAgent:
 
         with torch.no_grad():
             next_Q = self.q_net_target(next_state_batch).max(dim=1, keepdim=True)[0]
-            expected_Q = reward_batch + (1-masks)* self.gamma * next_Q
+            expected_Q = reward_batch + self.gamma * next_Q
         
         self.q_net.train()
         a_ints = action_batch.type(torch.long)

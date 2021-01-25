@@ -174,7 +174,7 @@ class TD3Agent:
         reward_batch = torch.FloatTensor(reward_batch).to(self.device)
         next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
         # masks = torch.FloatTensor(masks).to(self.device)
-        masks = torch.FloatTensor(1.-masks).to(self.device)
+        masks = torch.FloatTensor(masks).to(self.device)
 
         with torch.no_grad():
             # Select action according to policy and add clipped noise
@@ -184,7 +184,7 @@ class TD3Agent:
             next_Q1, next_Q2 = self.critic_target.forward(next_state_batch, next_actions.detach())
             next_Q = torch.min(next_Q1, next_Q2)
             # expected_Q = reward_batch + self.gamma * next_Q
-            expected_Q = reward_batch + (masks * self.gamma * next_Q )
+            expected_Q = reward_batch + self.gamma * next_Q
 
         
         curr_Q1, curr_Q2 = self.critic.forward(state_batch, action_batch)
