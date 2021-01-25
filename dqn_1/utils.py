@@ -47,8 +47,8 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
                             counter += 1
                         else:   
                             counter = 0
-                    print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
-                    break
+                        print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
+                        break
                     # if counter == 10:
                         # break
     except KeyboardInterrupt:

@@ -68,25 +68,25 @@ class DDQNAgent:
         self.replay_buffer = BasicBuffer(buffer_maxlen)
     
     def get_action(self, state, episode=0):
-        epsilon = 0.5 *( 1/(0.1*episode + 1) )
+        epsilon = 0.1#0.5 *( 1/(0.1*episode + 1) )
         state = torch.FloatTensor(state.flatten()).unsqueeze(0).to(self.device)
         actions = self.q_net(state)
-        if self.train == True:
-            if rd.rand() < self.explore_rate:
-                a_prob = self.softmax(actions).cpu().data.numpy()[0]
-                a_int = rd.choice(self.action_dim, p=a_prob)
-            else:
-                a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
-        else:
-            a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
         # if self.train == True:
-        #     if epsilon < rd.rand():
-        #         a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
-        #     else:
+        #     if rd.rand() < self.explore_rate:
         #         a_prob = self.softmax(actions).cpu().data.numpy()[0]
         #         a_int = rd.choice(self.action_dim, p=a_prob)
+        #     else:
+        #         a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
         # else:
         #     a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
+        if self.train == True:
+            if epsilon < rd.rand():
+                a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
+            else:
+                a_prob = self.softmax(actions).cpu().data.numpy()[0]
+                a_int = rd.choice(self.action_dim, p=a_prob)
+        else:
+            a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
 
         return a_int
 
