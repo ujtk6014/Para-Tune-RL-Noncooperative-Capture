@@ -233,7 +233,8 @@ def evaluate():
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     # plt.title('Action')
-
+    
+    plt.figure(figsize=(yoko,tate),dpi=100)
     plt.plot(np.arange(max_steps)*dt, k_hist[:,0],label = r"$\gain$")
     plt.ylabel('k gain')
     plt.xlabel(r'time [s]')
