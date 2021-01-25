@@ -91,8 +91,7 @@ def evaluate():
     D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
     dt = env.dt
     simutime = 30
-    max_steps = simutime/dt
-    simulation_iterations = int(simutime/dt)  # dt is 0.01
+    max_steps = int(simutime/dt)  # dt is 0.01
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
         for step, ch in enumerate(pbar):
