@@ -92,6 +92,7 @@ def evaluate():
     dt = env.dt
     simutime = 30
     max_steps = int(simutime/dt)  # dt is 0.01
+
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
         for step, ch in enumerate(pbar):
@@ -173,10 +174,10 @@ def evaluate():
     #------------------------------------------------
     
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,0],label =r"$q_{0}$")
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,1],label =r"$q_{1}$")
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,2],label =r"$q_{2}$")
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,3],label =r"$q_{3}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,0],label =r"$q_{0}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,1],label =r"$q_{1}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,2],label =r"$q_{2}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,3],label =r"$q_{3}$")
     # plt.title('Quaternion')
     plt.ylabel('quaternion value')
     plt.xlabel(r'time [s]')
@@ -187,10 +188,10 @@ def evaluate():
     plt.savefig(curr_dir + "/results/dqn_eval/plot_quat.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,0],label =r"$q_{e0}$")
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,1],label =r"$q_{e1}$")
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,2],label =r"$q_{e2}$")
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,3],label =r"$q_{e3}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,0],label =r"$q_{e0}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,1],label =r"$q_{e1}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,2],label =r"$q_{e2}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,3],label =r"$q_{e3}$")
     # plt.title('Quaternion Error')
     plt.ylabel('quaternion error value')
     plt.xlabel(r'time [s]')
@@ -200,17 +201,17 @@ def evaluate():
     plt.savefig(curr_dir + "/results/dqn_eval/plot_quate_error.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, w[:,0],label =r"$\omega_{x}$")
-    plt.plot(np.arange(simulation_iterations)*dt, w[:,1],label =r"$\omega_{y}$")
+    plt.plot(np.arange(max_steps)*dt, w[:,0],label =r"$\omega_{x}$")
+    plt.plot(np.arange(max_steps)*dt, w[:,1],label =r"$\omega_{y}$")
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/dqn_eval/plot_omega.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, inputs[:,0],label = r"$\tau_{x}$")
-    plt.plot(np.arange(simulation_iterations)*dt, inputs[:,1],label = r"$\tau_{y}$")
-    plt.plot(np.arange(simulation_iterations)*dt, inputs[:,2],label = r"$\tau_{z}$")
+    plt.plot(np.arange(max_steps)*dt, inputs[:,0],label = r"$\tau_{x}$")
+    plt.plot(np.arange(max_steps)*dt, inputs[:,1],label = r"$\tau_{y}$")
+    plt.plot(np.arange(max_steps)*dt, inputs[:,2],label = r"$\tau_{z}$")
     # plt.title('Action')
     plt.ylabel('Input torque [Nm]')
     plt.xlabel(r'time [s]')
@@ -220,12 +221,12 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/dqn_eval/plot_torque.png")
 
-    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(simulation_iterations-1)])
+    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
     angle = angle.reshape([-1,3])
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, angle[:,0],label = r"$\phi$")
-    plt.plot(np.arange(simulation_iterations)*dt, angle[:,1],label = r"$\theta$")
-    plt.plot(np.arange(simulation_iterations)*dt, angle[:,2],label = r"$\psi$")
+    plt.plot(np.arange(max_steps)*dt, angle[:,0],label = r"$\phi$")
+    plt.plot(np.arange(max_steps)*dt, angle[:,1],label = r"$\theta$")
+    plt.plot(np.arange(max_steps)*dt, angle[:,2],label = r"$\psi$")
     # plt.title('Action')
     plt.ylabel('angle [deg]')
     plt.xlabel(r'time [s]')
@@ -233,7 +234,7 @@ def evaluate():
     plt.tight_layout()
     # plt.title('Action')
 
-    plt.plot(np.arange(simulation_iterations)*dt, k_hist[:,0],label = r"$\gain$")
+    plt.plot(np.arange(max_steps)*dt, k_hist[:,0],label = r"$\gain$")
     plt.ylabel('k gain')
     plt.xlabel(r'time [s]')
     plt.tight_layout()
@@ -242,9 +243,9 @@ def evaluate():
     plt.savefig(curr_dir + "/results/dqn_eval/plot_k.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, D_hist[:,0],label = r"$D_{1}$")
-    plt.plot(np.arange(simulation_iterations)*dt, D_hist[:,1],label = r"$D_{2}$")
-    plt.plot(np.arange(simulation_iterations)*dt, D_hist[:,2],label = r"$D_{3}$")
+    plt.plot(np.arange(max_steps)*dt, D_hist[:,0],label = r"$D_{1}$")
+    plt.plot(np.arange(max_steps)*dt, D_hist[:,1],label = r"$D_{2}$")
+    plt.plot(np.arange(max_steps)*dt, D_hist[:,2],label = r"$D_{3}$")
     # plt.title('Action')
     plt.ylabel('d [deg]')
     plt.xlabel(r'time [s]')
@@ -255,7 +256,7 @@ def evaluate():
     plt.savefig(curr_dir + "/results/dqn_eval/plot_d.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,0],label = r"$actions$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,0],label = r"$actions$")
     # plt.title('Action')
     plt.ylabel('Selected action')
     plt.xlabel(r'time [s]')
@@ -265,10 +266,10 @@ def evaluate():
     plt.savefig(curr_dir + "/results/dqn_eval/plot_action.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,0]+r_hist[:,1]+r_hist[:,2],label = r"$toal$",linestyle='dotted')
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0]+r_hist[:,1]+r_hist[:,2],label = r"$toal$",linestyle='dotted')
     # plt.title('Action')
     plt.ylabel('reward')
     plt.xlabel(r'time [s]')
@@ -309,9 +310,9 @@ def env_pd():
     actions = np.append(actions, action,axis=0)
 
     dt = 0.01
-    simulation_iterations = int(50/0.01) -1 # dt is 0.01
+    max_steps = int(50/0.01) -1 # dt is 0.01
 
-    for i in range(1, simulation_iterations):
+    for i in range(1, max_steps):
         action = np.squeeze(action)
         next_error_state, reward, done, next_state, _ = env.step(action)
         # env.render()
@@ -356,10 +357,10 @@ def env_pd():
     yoko = 6.0
     #------------------------------------------------
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,0],label =r"$q_{0}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,1],label =r"$q_{1}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,2],label =r"$q_{2}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,3],label =r"$q_{3}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,0],label =r"$q_{0}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,1],label =r"$q_{1}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,2],label =r"$q_{2}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,3],label =r"$q_{3}$")
     # plt.title('Quaternion')
     plt.ylabel('quaternion value')
     plt.xlabel(r'time [s]')
@@ -370,10 +371,10 @@ def env_pd():
     plt.savefig(curr_dir + "/results/pd_test/plot_quat.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,0],label =r"$q_{e0}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,1],label =r"$q_{e1}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,2],label =r"$q_{e2}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,3],label =r"$q_{e3}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,0],label =r"$q_{e0}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,1],label =r"$q_{e1}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,2],label =r"$q_{e2}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,3],label =r"$q_{e3}$")
     # plt.title('Quaternion Error')
     plt.ylabel('quaternion error value')
     plt.xlabel(r'time [s]')
@@ -383,15 +384,15 @@ def env_pd():
     plt.savefig(curr_dir + "/results/pd_test/plot_quate_error.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, w[:,0],label =r"$\omega_{x}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, w[:,1],label =r"$\omega_{y}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, w[:,2],label =r"$\omega_{z}$")
+    plt.plot(np.arange(max_steps-1)*dt, w[:,0],label =r"$\omega_{x}$")
+    plt.plot(np.arange(max_steps-1)*dt, w[:,1],label =r"$\omega_{y}$")
+    plt.plot(np.arange(max_steps-1)*dt, w[:,2],label =r"$\omega_{z}$")
     plt.savefig(curr_dir + "/results/pd_test/plot_omega.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,0],label = r"$\tau_{x}$")
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,1],label = r"$\tau_{y}$")
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,2],label = r"$\tau_{z}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,0],label = r"$\tau_{x}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,1],label = r"$\tau_{y}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,2],label = r"$\tau_{z}$")
     # plt.title('Action')
     plt.ylabel('Input torque [Nm]')
     plt.xlabel(r'time [s]')
@@ -401,12 +402,12 @@ def env_pd():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/pd_test/plot_torque.png")
 
-    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(simulation_iterations-1)])
+    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
     angle = angle.reshape([-1,3])
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,0],label = r"$\phi$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,1],label = r"$\theta$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,2],label = r"$\psi$")
+    plt.plot(np.arange(max_steps-1)*dt, angle[:,0],label = r"$\phi$")
+    plt.plot(np.arange(max_steps-1)*dt, angle[:,1],label = r"$\theta$")
+    plt.plot(np.arange(max_steps-1)*dt, angle[:,2],label = r"$\psi$")
     # plt.title('Action')
     plt.ylabel('angle [deg]')
     plt.xlabel(r'time [s]')
@@ -445,9 +446,9 @@ def env_adaptive():
     actions = np.append(actions, action,axis=0)
 
     dt = env.dt
-    simulation_iterations = int(30/dt) -1 # dt is 0.01
+    max_steps = int(30/dt) -1 # dt is 0.01
 
-    for i in range(1, simulation_iterations):
+    for i in range(1, max_steps):
         action = np.squeeze(action)
 
         # if i == 20/dt:
@@ -506,10 +507,10 @@ def env_adaptive():
     yoko = 4.0
     #------------------------------------------------
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,0],label =r"$q_{0}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,1],label =r"$q_{1}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,2],label =r"$q_{2}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, q[:,3],label =r"$q_{3}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,0],label =r"$q_{0}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,1],label =r"$q_{1}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,2],label =r"$q_{2}$")
+    plt.plot(np.arange(max_steps-1)*dt, q[:,3],label =r"$q_{3}$")
     # plt.title('Quaternion')
     plt.ylabel('quaternion value')
     plt.xlabel(r'time [s]')
@@ -520,10 +521,10 @@ def env_adaptive():
     plt.savefig(curr_dir + "/results/adap_test/plot_quat.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,0],label =r"$q_{e0}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,1],label =r"$q_{e1}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,2],label =r"$q_{e2}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, qe[:,3],label =r"$q_{e3}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,0],label =r"$q_{e0}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,1],label =r"$q_{e1}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,2],label =r"$q_{e2}$")
+    plt.plot(np.arange(max_steps-1)*dt, qe[:,3],label =r"$q_{e3}$")
     # plt.title('Quaternion Error')
     plt.ylabel('quaternion error value')
     plt.xlabel(r'time [s]')
@@ -533,9 +534,9 @@ def env_adaptive():
     plt.savefig(curr_dir + "/results/adap_test/plot_quate_error.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, w[:,0],label =r"$\omega_{x}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, w[:,1],label =r"$\omega_{y}$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, w[:,2],label =r"$\omega_{z}$")
+    plt.plot(np.arange(max_steps-1)*dt, w[:,0],label =r"$\omega_{x}$")
+    plt.plot(np.arange(max_steps-1)*dt, w[:,1],label =r"$\omega_{y}$")
+    plt.plot(np.arange(max_steps-1)*dt, w[:,2],label =r"$\omega_{z}$")
     # plt.title('Angular velocity')
     plt.ylabel('angular velocity [rad/s]')
     plt.xlabel(r'time [s]')
@@ -545,9 +546,9 @@ def env_adaptive():
     plt.savefig(curr_dir + "/results/adap_test/plot_omega.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,0],label = r"$\tau_{x}$")
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,1],label = r"$\tau_{y}$")
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,2],label = r"$\tau_{z}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,0],label = r"$\tau_{x}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,1],label = r"$\tau_{y}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,2],label = r"$\tau_{z}$")
     # plt.title('Action')
     plt.ylabel('Input torque [Nm]')
     plt.xlabel(r'time [s]')
@@ -557,12 +558,12 @@ def env_adaptive():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/adap_test/plot_torque.png")
 
-    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(simulation_iterations-1)])
+    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
     angle = angle.reshape([-1,3])
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,0],label = r"$\phi$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,1],label = r"$\theta$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,2],label = r"$\psi$")
+    plt.plot(np.arange(max_steps-1)*dt, angle[:,0],label = r"$\phi$")
+    plt.plot(np.arange(max_steps-1)*dt, angle[:,1],label = r"$\theta$")
+    plt.plot(np.arange(max_steps-1)*dt, angle[:,2],label = r"$\psi$")
     # plt.title('Action')
     plt.ylabel('angle [deg]')
     plt.xlabel(r'time [s]')
@@ -573,10 +574,10 @@ def env_adaptive():
     plt.savefig(curr_dir + "/results/adap_test/plot_angle.png")
     
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
-    plt.plot(np.arange(simulation_iterations-1)*dt, r_hist[:,0]+r_hist[:,1]+r_hist[:,2],label = r"$toal$",linestyle='dotted')
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
+    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0]+r_hist[:,1]+r_hist[:,2],label = r"$toal$",linestyle='dotted')
     # plt.title('Action')
     plt.ylabel('reward')
     plt.xlabel(r'time [s]')
