@@ -284,7 +284,7 @@ class SatelliteContinuousEnv(gym.Env):
                 or abs(action[2]) > self.max_action 
         done_2 = self.nsteps >= self.max_steps
         done_3 = self.neg_param_flag
-        done = bool(done_1 or done_2 or done_3)
+        done = bool(done_1 or done_2)
 
         # 報酬関数
         #--------REWARD---------
@@ -309,11 +309,11 @@ class SatelliteContinuousEnv(gym.Env):
             # epsiode just ended
             self.steps_beyond_done = 0
             if bool(done_1):
-                reward = -100
+                reward = -25
                 print("done_1")
             elif done_3:
                 print("done_3")
-                reward = -100
+                reward = -25
             else:
                 print("done_2")
                 reward = 0
