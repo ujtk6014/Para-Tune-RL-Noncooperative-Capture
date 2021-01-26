@@ -38,7 +38,7 @@ class Critic(nn.Module):
         #initialization
         self.init_w=3e-3
         self.init_weights(self.init_w)
-   
+
     def init_weights(self, init_w): #2021/1/11
         self.linear1.weight.data = fanin_init(self.linear1.weight.data.size())
         self.linear2.weight.data = fanin_init(self.linear2.weight.data.size())
@@ -108,7 +108,7 @@ class Actor(nn.Module):
 
 class TD3Agent:
     def __init__(self, env, gamma, tau, buffer_maxlen, critic_learning_rate, actor_learning_rate, train, decay):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         print(self.device)
         self.env = env
         self.obs_dim = env.observation_space.shape[0]

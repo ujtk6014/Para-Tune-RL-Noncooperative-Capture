@@ -26,10 +26,10 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=100000, ma
     critic_lr = critic_lr
     actor_lr = actor_lr
 
-    # agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps)
+    agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps)
     #学習済みモデルを使うとき
-    curr_dir = os.path.abspath(os.getcwd())
-    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
+    # curr_dir = os.path.abspath(os.getcwd())
+    # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
 
     episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size)
 
@@ -45,13 +45,14 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=100000, ma
     plt.rcParams['axes.grid'] = True # make grid
     #--------------------------------------------------------------  
 
+    curr_dir = os.path.abspath(os.getcwd())
     plt.figure(figsize=(5.0,3.5),dpi=100)
     plt.plot(episode_rewards)
     plt.xlabel("Episodes")
     plt.ylabel("Reward")
     plt.show()
+    plt.savefig(curr_dir + "/results/td3_eval/plot_training_reward.png")
 
-    curr_dir = os.path.abspath(os.getcwd())
     if not os.path.isdir("models"):
         os.mkdir("models")
     torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
@@ -82,11 +83,11 @@ def evaluate():
     simutime = 30
     env.simutime = simutime
         
-    simulation_iterations = int(simutime/dt) -1 # dt is 0.01
+    max_steps = int(simutime/dt) -1 # dt is 0.01
     alpha = 0.5
 
     th_e = np.array(env.inertia.flatten())
-    with tqdm(range(simulation_iterations),leave=False) as pbar:
+    with tqdm(range(max_steps),leave=False) as pbar:
         for i, ch in enumerate(pbar):
             # if i==1 or i%100 ==0:
             action = agent.get_action(state)
@@ -143,11 +144,12 @@ def evaluate():
     tate = 2.0
     yoko = 4.0
     #------------------------------------------------
+
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,0],label =r"$q_{0}$")
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,1],label =r"$q_{1}$")
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,2],label =r"$q_{2}$")
-    plt.plot(np.arange(simulation_iterations)*dt, q[:,3],label =r"$q_{3}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,0],label =r"$q_{0}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,1],label =r"$q_{1}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,2],label =r"$q_{2}$")
+    plt.plot(np.arange(max_steps)*dt, q[:,3],label =r"$q_{3}$")
     # plt.title('Quaternion')
     plt.ylabel('quaternion value')
     plt.xlabel(r'time [s]')
@@ -158,10 +160,10 @@ def evaluate():
     plt.savefig(curr_dir + "/results/td3_eval/plot_quat.png")
 
     plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,0],label =r"$q_{e0}$")
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,1],label =r"$q_{e1}$")
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,2],label =r"$q_{e2}$")
-    plt.plot(np.arange(simulation_iterations)*dt, qe[:,3],label =r"$q_{e3}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,0],label =r"$q_{e0}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,1],label =r"$q_{e1}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,2],label =r"$q_{e2}$")
+    plt.plot(np.arange(max_steps)*dt, qe[:,3],label =r"$q_{e3}$")
     # plt.title('Quaternion Error')
     plt.ylabel('quaternion error value')
     plt.xlabel(r'time [s]')
@@ -170,22 +172,27 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/td3_eval/plot_quate_error.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, w[:,0],label =r"$\omega_{x}$")
-    plt.plot(np.arange(simulation_iterations)*dt, w[:,1],label =r"$\omega_{y}$")
-    plt.plot(np.arange(simulation_iterations)*dt, w[:,2],label =r"$\omega_{z}$")
+    plt.figure(figsize=(12,5),dpi=100)
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.3, hspace=0.3)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(231)
+    plt.plot(np.arange(max_steps)*dt, w[:,0],label =r"$\omega_{x}$")
+    plt.plot(np.arange(max_steps)*dt, w[:,1],label =r"$\omega_{y}$")
+    plt.plot(np.arange(max_steps)*dt, w[:,2],label =r"$\omega_{z}$")
     # plt.title('Angular velocity')
     plt.ylabel('angular velocity [rad/s]')
     plt.xlabel(r'time [s]')
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/td3_eval/plot_omega.png")
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_omega.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,0],label = r"$\tau_{x}$")
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,1],label = r"$\tau_{y}$")
-    plt.plot(np.arange(simulation_iterations)*dt, actions[:,2],label = r"$\tau_{z}$")
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(232)
+    plt.plot(np.arange(max_steps)*dt, actions[:,0],label = r"$\tau_{x}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,1],label = r"$\tau_{y}$")
+    plt.plot(np.arange(max_steps)*dt, actions[:,2],label = r"$\tau_{z}$")
     # plt.title('Action')
     plt.ylabel('Input torque [Nm]')
     plt.xlabel(r'time [s]')
@@ -193,14 +200,15 @@ def evaluate():
     plt.tight_layout()
     # plt.ylim(-0.3, 0.25)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/td3_eval/plot_torque.png")
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_torque.png")
 
-    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(simulation_iterations-1)])
+    angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps)])
     angle = angle.reshape([-1,3])
-    plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,0],label = r"$\phi$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,1],label = r"$\theta$")
-    plt.plot(np.arange(simulation_iterations-1)*dt, angle[:,2],label = r"$\psi$")
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(233)
+    plt.plot(np.arange(max_steps)*dt, angle[:,0],label = r"$\phi$")
+    plt.plot(np.arange(max_steps)*dt, angle[:,1],label = r"$\theta$")
+    plt.plot(np.arange(max_steps)*dt, angle[:,2],label = r"$\psi$")
     # plt.title('Action')
     plt.ylabel('angle [deg]')
     plt.xlabel(r'time [s]')
@@ -208,21 +216,32 @@ def evaluate():
     plt.tight_layout()
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/td3_eval/plot_angle.png")
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_angle.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(simulation_iterations)*dt, param[:,0],label = r"$D_{1}$")
-    plt.plot(np.arange(simulation_iterations)*dt, param[:,0],label = r"$D_{2}$")
-    plt.plot(np.arange(simulation_iterations)*dt, param[:,0],label = r"$D_{3}$")
-    plt.plot(np.arange(simulation_iterations)*dt, param[:,0],label = r"$D_{4}$")
-    plt.plot(np.arange(simulation_iterations)*dt, param[:,0],label = r"$D_{5}$")
-    plt.ylabel('Control parameters')
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(234)
+    plt.plot(np.arange(max_steps)*dt, param[:,0],label = r"$\gain$")
+    plt.ylabel('k gain')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_k.png")
+
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(235)
+    plt.plot(np.arange(max_steps)*dt, parm[:,1],label = r"$D_{1}$")
+    plt.plot(np.arange(max_steps)*dt, param[:,2],label = r"$D_{2}$")
+    plt.plot(np.arange(max_steps)*dt, param[:,3],label = r"$D_{3}$")
+    # plt.title('Action')
+    plt.ylabel('d [deg]')
     plt.xlabel(r'time [s]')
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/td3_eval/plot_param.png")
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
+    plt.savefig(curr_dir + "/results/td3_eval/results.png")
     plt.show()
     # -------------------------結果プロット終わり--------------------------------
 def env_pd():
