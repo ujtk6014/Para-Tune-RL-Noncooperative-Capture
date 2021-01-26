@@ -60,7 +60,7 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
     episode_rewards = []
     counter = 0
-    k_delta = 0.05
+    k_delta = 0.01
     D_delta = 1e-5
     try:
         with tqdm(range(max_episodes),leave=False) as pbar:
@@ -74,7 +74,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                 D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
                 for step in range(max_steps):
                     pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
-                    if step % 3 == 0:
+                    if step % 1 == 0:
                         action = agent.get_action(state, episode)
                     #----------------control law (Adaptive controller)-----------------------
                         n= str(Base_10_to_n(action,3))

@@ -7,6 +7,7 @@ import numpy as np
 from gym import make as gym_make
 from gym import spaces
 from gym.utils import seeding
+from random import randint
 
 logger = logging.getLogger(__name__)
 
@@ -284,6 +285,13 @@ class SatelliteContinuousEnv(gym.Env):
                 or abs(action[2]) > self.max_action 
         done_2 = self.nsteps >= self.max_steps
         done_3 = self.neg_param_flag
+        
+        if omega@omega < 1e-6:
+            self.omega_count += 1
+        if self.omega_count > 5:
+            done_4 = True
+            self.omega_count = 0
+        
         done = bool(done_1 or done_2)
 
         # 報酬関数
@@ -314,6 +322,9 @@ class SatelliteContinuousEnv(gym.Env):
             elif done_3:
                 print("done_3")
                 reward = -25
+            elif done_4:
+                print("done_4")
+                reward = 1
             else:
                 print("done_2")
                 reward = 0
@@ -338,7 +349,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = 3 #np.random.uniform(1, high=3)
+        self.multi = np.random.randint(100,500)/100
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
