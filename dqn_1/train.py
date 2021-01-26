@@ -428,6 +428,7 @@ def env_adaptive():
 
     curr_dir = os.path.abspath(os.getcwd())
     env.reset()
+    print('Initial omega is:' + str(np.rad2deg(env.startOmega)))
     total_r = 0
     qe = np.empty((0,4))
     q = np.empty((0,4))
@@ -507,7 +508,11 @@ def env_adaptive():
     tate = 2.0
     yoko = 4.0
     #------------------------------------------------
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.figure(figsize=(12,5),dpi=100)
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.3, hspace=0.3)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(231)
     plt.plot(np.arange(max_steps-1)*dt, q[:,0],label =r"$q_{0}$")
     plt.plot(np.arange(max_steps-1)*dt, q[:,1],label =r"$q_{1}$")
     plt.plot(np.arange(max_steps-1)*dt, q[:,2],label =r"$q_{2}$")
@@ -519,9 +524,10 @@ def env_adaptive():
     plt.tight_layout()
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.grid(True)
-    plt.savefig(curr_dir + "/results/adap_test/plot_quat.png")
+    # plt.savefig(curr_dir+ "/results/adap_test/plot_quat.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(232)
     plt.plot(np.arange(max_steps-1)*dt, qe[:,0],label =r"$q_{e0}$")
     plt.plot(np.arange(max_steps-1)*dt, qe[:,1],label =r"$q_{e1}$")
     plt.plot(np.arange(max_steps-1)*dt, qe[:,2],label =r"$q_{e2}$")
@@ -532,9 +538,10 @@ def env_adaptive():
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=4)
     plt.tight_layout()
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/adap_test/plot_quate_error.png")
+    # plt.savefig(curr_dir + "/results/adap_test/plot_quate_error.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(233)
     plt.plot(np.arange(max_steps-1)*dt, w[:,0],label =r"$\omega_{x}$")
     plt.plot(np.arange(max_steps-1)*dt, w[:,1],label =r"$\omega_{y}$")
     plt.plot(np.arange(max_steps-1)*dt, w[:,2],label =r"$\omega_{z}$")
@@ -544,9 +551,10 @@ def env_adaptive():
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/adap_test/plot_omega.png")
+    # plt.savefig(curr_dir + "/results/adap_test/plot_omega.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(234)
     plt.plot(np.arange(max_steps)*dt, actions[:,0],label = r"$\tau_{x}$")
     plt.plot(np.arange(max_steps)*dt, actions[:,1],label = r"$\tau_{y}$")
     plt.plot(np.arange(max_steps)*dt, actions[:,2],label = r"$\tau_{z}$")
@@ -557,11 +565,12 @@ def env_adaptive():
     plt.tight_layout()
     # plt.ylim(-0.3, 0.25)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/adap_test/plot_torque.png")
+    # plt.savefig(curr_dir + "/results/adap_test/plot_torque.png")
 
     angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
     angle = angle.reshape([-1,3])
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(235)
     plt.plot(np.arange(max_steps-1)*dt, angle[:,0],label = r"$\phi$")
     plt.plot(np.arange(max_steps-1)*dt, angle[:,1],label = r"$\theta$")
     plt.plot(np.arange(max_steps-1)*dt, angle[:,2],label = r"$\psi$")
@@ -572,9 +581,10 @@ def env_adaptive():
     plt.tight_layout()
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/adap_test/plot_angle.png")
+    # plt.savefig(curr_dir + "/results/adap_test/plot_angle.png")
     
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(236)
     plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
     plt.plot(np.arange(max_steps-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
     plt.plot(np.arange(max_steps-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
@@ -586,7 +596,8 @@ def env_adaptive():
     plt.legend()
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/dqn_eval/plot_reward.png")
+
+    plt.savefig(curr_dir + "/results/adap_test/results.png")
     plt.show()    
 
 if __name__ == '__main__':
