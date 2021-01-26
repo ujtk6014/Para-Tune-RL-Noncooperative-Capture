@@ -93,7 +93,7 @@ def evaluate():
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
         for step, ch in enumerate(pbar):
-            if step % 1 == 0:
+            if step % 3 == 0:
                 action = agent.get_action(state)
                 n= str(Base_10_to_n(action,3))
                 while len(n) < 4:
@@ -125,6 +125,7 @@ def evaluate():
 
             dth = np.linalg.inv(D) @ Y.T @ x2
             th_e += env.dt*dth
+            env.est_th = [th_e[0],th_e[4],th_e[8]]
             # action = np.squeeze(action)
             next_error_state, reward, done, next_state, _ = env.step(input)
             # if step == 20/dt:
