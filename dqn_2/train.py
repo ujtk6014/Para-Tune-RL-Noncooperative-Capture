@@ -223,6 +223,7 @@ def evaluate():
 
     angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
     angle = angle.reshape([-1,3])
+
     # plt.figure(figsize=(yoko,tate),dpi=100)
     plt.subplot(233)
     plt.plot(np.arange(max_steps-1)*dt, angle[:,0],label = r"$\phi$")
