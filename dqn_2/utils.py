@@ -60,7 +60,7 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
     episode_rewards = []
     counter = 0
-    k_delta = 0.01
+    k_delta = 0.05
     D_delta = 1e-5
     try:
         with tqdm(range(max_episodes),leave=False) as pbar:
