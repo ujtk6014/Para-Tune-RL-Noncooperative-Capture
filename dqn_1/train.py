@@ -96,7 +96,7 @@ def evaluate():
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
         for step, ch in enumerate(pbar):
-            if step % 1 == 0:
+            if step % 2 == 0:
                 action = agent.get_action(state)
                 n= str(Base_10_to_n(action,3))
                 while len(n) < 4:
