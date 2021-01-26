@@ -146,7 +146,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.est_th = np.diag(self.inertia)
 
         #シミュレーションパラメータ　
-        self.dt = 0.01 
+        self.dt = 0.1 
         self.simutime =30
         
         #報酬パラメータ
