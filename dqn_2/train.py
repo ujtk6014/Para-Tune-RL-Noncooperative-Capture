@@ -117,7 +117,7 @@ def evaluate():
             W = state[4:7]
             x1 = state[1:4]
             x2 = alpha*x1 + W
-            dqe = env.quaternion_differential(W,next_error_state[0:4])
+            dqe = env.quaternion_differential(W,state[0:4])
             Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
                 [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
                 [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
@@ -457,7 +457,7 @@ def env_adaptive():
         W = next_error_state[4:7]
         x1 = next_error_state[1:4]
         x2 = alpha*x1 + W
-        dqe = env.quaternion_differential(W,next_error_state[0:4])
+        dqe = env.quaternion_differential(W,next_error_state[4:7])
         Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
              [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
               [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
