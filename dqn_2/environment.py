@@ -199,6 +199,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.soft_angle_thre = 0.99
         self.omega_thre = 0.000001
         self.max_action = 0.5
+        self.omega_count = 0
         #------------------------------------------------------------------------------------------------------------
 
         # 状態量（姿勢角４・角速度３・加角速度３・推定慣性モーメント対角成分３）
