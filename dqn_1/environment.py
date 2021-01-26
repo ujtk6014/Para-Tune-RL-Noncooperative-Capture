@@ -143,7 +143,8 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia_inv = np.linalg.inv(self.inertia)
         self.g = np.array([0,0,0])  # gravity
 
-        self.est_th = np.diag(self.inertia)
+        # self.est_th = np.diag(self.inertia)
+        self.est_dth = np.array([0,0,0])
 
         #シミュレーションパラメータ　
         self.dt = 0.1 
@@ -220,7 +221,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.action_space = spaces.Discrete(81)
         self.observation_space = spaces.Box(-high, high)
         self.pre_state = np.hstack((self.startQuate,self.startOmega))
-        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega,self.est_th))
+        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega,self.est_dth))
         # self.pre_state = [self.startQuate,self.startOmega]
         # self.state = [self.errorQuate,self.d_errorQuate, self.startOmega]
 
@@ -273,7 +274,7 @@ class SatelliteContinuousEnv(gym.Env):
         qe_dot_new = self.quaternion_differential(omega_new, qe_new)
 
         self.pre_state = np.hstack((q_new, omega_new))
-        self.state = np.hstack((qe_new, qe_dot_new, omega_new,self.est_th))
+        self.state = np.hstack((qe_new, qe_dot_new, omega_new,self.est_dth))
 
         # とりまdoneはfalseにしておく
         # done = False
@@ -352,7 +353,8 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
-        self.est_th = np.diag(self.inertia)
+        # self.est_th = nps.diag(self.inertia)
+        self.est_dth = np.array([0,0,0])
 
 
         # 初期状態 角度(deg)　角速度(rad/s)
@@ -385,7 +387,7 @@ class SatelliteContinuousEnv(gym.Env):
         #エラークオータニオンの微分
         self.d_errorQuate = self.quaternion_differential(self.startOmega, self.errorQuate)
         self.pre_state = np.hstack((self.startQuate,self.startOmega))
-        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega, self.est_th))
+        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega, self.est_dth))
 
         obs = self.state
         # タイムスタンプをリセット

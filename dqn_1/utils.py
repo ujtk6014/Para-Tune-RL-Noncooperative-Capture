@@ -107,7 +107,8 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
 
                     dth = np.linalg.inv(D) @ Y.T @ x2
                     th_e += env.dt*dth
-                    env.est_th = [th_e[0],th_e[4],th_e[8]]
+                    # env.est_th = [th_e[0],th_e[4],th_e[8]]
+                    env.est_dth = [dth[0],dth[4],dth[8]]
                     #---------------------------------------------------------------------
                     next_error_state, reward, done, next_state, _ = env.step(input)
                     agent.replay_buffer.push(state, action, reward, next_error_state, done)
