@@ -88,7 +88,7 @@ class Actor(nn.Module):
         self.linear3 = nn.Linear(128, self.action_dim)
 
         #initialization
-        self.init_w=3e-3
+        self.init_w=1e-3
         self.init_weights(self.init_w)
 
     def init_weights(self, init_w): #2021/1/11

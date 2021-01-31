@@ -24,8 +24,6 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
         with tqdm(range(max_episodes),leave=False) as pbar:
             for episode, ch in enumerate(pbar):
                 pbar.set_description("[Train] Episode %d" % episode)
-                # print("\nThe goal angle is: %d" + str(env.goalEuler))
-            # for episode in range(max_episodes):
                 state = env.reset()
                 episode_reward = 0    
                 
@@ -62,21 +60,24 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
     counter = 0
     k_delta = 0.01
     D_delta = 1e-5
+    state_num = 7 #姿勢角４・角速度３
     try:
         with tqdm(range(max_episodes),leave=False) as pbar:
             for episode, ch in enumerate(pbar):
                 pbar.set_description("[Train] Episode %d" % episode)
-                state = np.empty((0,4))
+                state_hist = np.zeros(state_num*time_window)
+                next_state_hist = np.zeros(state_num*time_window)
                 obs = env.reset()
-                episode_reward = 0    
                 th_e = np.array(env.inertia.flatten())
+                episode_reward = 0    
                 alpha = 0.5
                 k = 0.8
                 D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
                 for step in range(max_steps):
                     pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
+                    
                     if step > time_window:
-                        action = agent.get_action(state, episode)
+                        action = agent.get_action(state_hist, episode)
                     #----------------control law (Adaptive controller)-----------------------
                         n= str(Base_10_to_n(action,3))
                         while len(n) < 4:
@@ -95,25 +96,25 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                             D[8,8] += D_delta * para[3]
                             para = np.empty((4,1))
                             if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
-                                env.neg_param_flag = True
+                                env.neg_param_flag = False
+                    W = obs[4:7]
+                    x1 = obs[1:4]
+                    x2 = alpha*x1 + W
+                    dqe = env.quaternion_differential(W,obs[0:4])
+                    Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
+                        [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
+                        [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
+                    input = -0.5*x1 -Y@th_e - k*x2
 
+                    dth = np.linalg.inv(D) @ Y.T @ x2
+                    th_e += env.dt*dth
+                    #---------------------------------------------------------------------
+                    next_error_state, reward, done, next_state, _ = env.step(input)
+                    next_state_hist[1:] = next_state_hist[0:-1]
+                    next_state_hist[:state_num] = next_error_state
                     
-                        W = obs[8:11]
-                        x1 = obs[1:4]
-                        x2 = alpha*x1 + W
-                        dqe = obs[4:8]
-                        Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
-                            [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
-                            [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
-                        input = -0.5*x1 -Y@th_e - k*x2
-
-                        dth = np.linalg.inv(D) @ Y.T @ x2
-                        th_e += env.dt*dth
-                        #---------------------------------------------------------------------
-                        next_error_state, reward, done, next_state, _ = env.step(input)
-                        obs = next_error_state
-
-                        agent.replay_buffer.push(state, action, reward, next_error_state, done)
+                    if step > time_window:
+                        agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
                     episode_reward += reward
 
                     # update the agent if enough transitions are stored in replay buffer
@@ -129,6 +130,11 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                             counter = 0
                         print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
                         break
+                    
+                    #状態量の更新
+                    obs = next_error_state
+                    state_hist = next_state_hist
+
     except KeyboardInterrupt:
         print('Training stopped manually!!!')
         pass

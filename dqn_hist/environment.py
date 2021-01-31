@@ -182,11 +182,12 @@ class SatelliteContinuousEnv(gym.Env):
         self.angle_thre = 0.999962
         self.soft_angle_thre = 0.99
         self.omega_thre = 0.000001
-        self.max_action = 0.5
+        self.max_action = 1
+        self.time_window = 5
         #------------------------------------------------------------------------------------------------------------
 
         # 状態量（姿勢角４・角速度３）
-        high = np.ones(7,dtype = np.float32)*np.finfo(np.float32)
+        high = np.ones(7*self.time_window,dtype = np.float32)*np.finfo(np.float32).max
 
         self.action_space = spaces.Discrete(81)
         self.observation_space = spaces.Box(-high, high)
