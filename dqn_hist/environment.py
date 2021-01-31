@@ -254,7 +254,7 @@ class SatelliteContinuousEnv(gym.Env):
                 or abs(action[2]) > self.max_action 
         done_2 = self.nsteps >= self.max_steps
         done_3 = self.neg_param_flag
-
+        done_4 = False
         if omega@omega < 1e-5:
             self.omega_count += 1
         if self.omega_count > 5:
