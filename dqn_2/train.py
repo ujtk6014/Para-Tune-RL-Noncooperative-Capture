@@ -68,7 +68,8 @@ def evaluate():
 
     curr_dir = os.path.abspath(os.getcwd())
 
-    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl")
+    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn.pkl",map_location='cuda')
+    agent.device = torch.device('cuda')
     agent.train = False
 
     state = env.reset()

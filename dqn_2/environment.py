@@ -191,7 +191,7 @@ class SatelliteContinuousEnv(gym.Env):
 
         #---thresholds for episode-----------------------------------------------------------------------------------
         self.nsteps = 0  # timestep
-        self.max_steps = 3000
+        self.max_steps = 300
 
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5
@@ -323,9 +323,9 @@ class SatelliteContinuousEnv(gym.Env):
             elif done_3:
                 print("done_3")
                 reward = -25
-            elif done_4:
-                print("done_4")
-                reward = 1
+            # elif done_4:
+            #     print("done_4")
+            #     reward = 1
             else:
                 print("done_2")
                 reward = 0

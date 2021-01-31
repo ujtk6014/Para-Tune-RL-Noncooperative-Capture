@@ -191,7 +191,7 @@ class SatelliteContinuousEnv(gym.Env):
 
         #---thresholds for episode-----------------------------------------------------------------------------------
         self.nsteps = 0  # timestep
-        self.max_steps = 3000
+        self.max_steps = 300
 
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5
