@@ -184,6 +184,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_thre = 0.000001
         self.max_action = 1
         self.time_window = 5
+        self.omega_count = 5
         #------------------------------------------------------------------------------------------------------------
 
         # 状態量（姿勢角４・角速度３）
@@ -253,7 +254,14 @@ class SatelliteContinuousEnv(gym.Env):
                 or abs(action[2]) > self.max_action 
         done_2 = self.nsteps >= self.max_steps
         done_3 = self.neg_param_flag
-        done = bool(done_1 or done_2 )
+
+        if omega@omega < 1e-5:
+            self.omega_count += 1
+        if self.omega_count > 5:
+            done_4 = True
+            self.omega_count = 0
+
+        done = bool(done_1 or done_2 or done_4)
 
         # 報酬関数
         #--------REWARD---------
@@ -285,6 +293,9 @@ class SatelliteContinuousEnv(gym.Env):
             elif done_3:
                 print("done_3")
                 reward = -10
+            elif done_4:
+                print("done_4")
+                reward = 1
             else:
                 print("done_2")
                 reward = 0
