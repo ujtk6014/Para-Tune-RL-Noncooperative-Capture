@@ -8,6 +8,13 @@ from buffer import BasicBuffer
 from noise import OUNoise
 import numpy as np
 
+# namedtupleを生成
+from collections import namedtuple
+
+Transition = namedtuple(
+    'Transition', ('state', 'action', 'reward', 'next_state','done'))
+
+
 #initialization 2021/1/11
 def fanin_init(size, fanin=None):
     fanin = fanin or size[0]
@@ -91,8 +98,14 @@ class DDQNAgent:
         return a_int
 
     def update(self,batch_size):
-        states, actions, rewards, next_states, _ = self.replay_buffer.sample(batch_size)
-        state_batch, action_batch, reward_batch, next_state_batch, masks = self.replay_buffer.sample(batch_size)
+        transitions = self.replay_buffer.sample(batch_size)
+        batch = Transition(*zip(*transitions))
+        state_batch = batch.state
+        action_batch = batch.action
+        reward_batch = batch.reward
+        next_state_batch = batch.next_state
+        masks = batch.done
+        # state_batch, action_batch, reward_batch, next_state_batch, masks = self.replay_buffer.sample(batch_size)
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         action_batch = torch.FloatTensor(action_batch).to(self.device)
         reward_batch = torch.FloatTensor(reward_batch).to(self.device)
