@@ -150,7 +150,7 @@ class DDQNAgent:
         q_eval = self.q_net(state).gather(1, a_ints.unsqueeze(1))
         td_error = expected_Q - q_eval
 
-        return td_error.detach().to('cou').numpy().tolist()
+        return td_error.detach().to('cpu').numpy().tolist()
 
     def update_td_error_memory(self):  # PrioritizedExperienceReplayで追加
         '''TD誤差メモリに格納されているTD誤差を更新する'''
