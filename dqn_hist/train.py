@@ -70,11 +70,11 @@ def evaluate():
 
     curr_dir = os.path.abspath(os.getcwd())
 
-    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl",map_location='cuda')
-    agent.device = torch.device('cuda')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl",map_location='cpu')
+    agent.device = torch.device('cpu')
     agent.train = False
 
-    state = env.reset()
+    obs = env.reset()
     print("The goal angle is :" + str(np.rad2deg(env.goalEuler)) +"\n")
     total_r = 0
     qe = np.empty((0,4))
@@ -90,39 +90,46 @@ def evaluate():
     k_delta = 0.01
     D_delta = 1e-5
     alpha = 0.5
-    k = 0.8
+    k = np.array([0.8])
     D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
     dt = env.dt
     simutime = 30
+    state_num = 7 #姿勢角４・角速度３
+    time_window = 5
+    state_hist = np.zeros(state_num*time_window)
+    next_state_hist = np.zeros(state_num*time_window)
     max_steps = int(simutime/dt)  # dt is 0.01
-
     th_e = np.array(env.inertia.flatten())
+
     with tqdm(range(max_steps),leave=False) as pbar:
         for step, ch in enumerate(pbar):
-            action = agent.get_action(state)
-            n= str(Base_10_to_n(action,3))
-            while len(n) < 4:
-                n ="0"+n
-            para = np.empty((4,1))
-            for i in range(4):
-                if n[i] == '0':
-                    para[i] = 1
-                elif n[i] == '1':
-                    para[i] = 0
-                elif n[i] == '2':
-                    para[i] = -1
+            if step > time_window:
+                action = agent.get_action(state_hist)
+                n= str(Base_10_to_n(action,3))
+                while len(n) < 4:
+                    n ="0"+n
+                para = np.empty((4,1))
+                for i in range(4):
+                    if n[i] == '0':
+                        para[i] = 1
+                    elif n[i] == '1':
+                        para[i] = 0
+                    elif n[i] == '2':
+                        para[i] = -1
 
-            k += k_delta * para[0]
-            D[0,0] += D_delta * para[1]
-            D[4,4] += D_delta * para[2]
-            D[8,8] += D_delta * para[3]
-            if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
-                env.neg_param_flag = True
-            para = np.empty((4,1))
-            W = state[4:7]
-            x1 = state[1:4]
+                    k += k_delta * para[0]
+                    D[0,0] += D_delta * para[1]
+                    D[4,4] += D_delta * para[2]
+                    D[8,8] += D_delta * para[3]
+                    if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
+                        env.neg_param_flag = True
+                    para = np.empty((4,1))
+            else:
+                action = np.array([0])
+            W = obs[4:7]
+            x1 = obs[1:4]
             x2 = alpha*x1 + W
-            dqe = env.quaternion_differential(W,state[0:4])
+            dqe = env.quaternion_differential(W,obs[0:4])
             Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
                 [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
                 [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
@@ -132,18 +139,22 @@ def evaluate():
             th_e += env.dt*dth
             # action = np.squeeze(action)
             next_error_state, reward, done, next_state, _ = env.step(input)
-        
+            next_state_hist[1:] = next_state_hist[0:-1]
+            next_state_hist[:state_num] = next_error_state
+
             q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
             qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
-            w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
+            w=np.append(w,next_error_state[4:7].reshape(1,-1),axis=0)
             total_r += reward
             d_tmp = np.array([D[0,0],D[4,4],D[8,8]])
-            k_hist = np.append(k_hist, k.reshape(1,-1),axis=0)
+            k_hist = np.append(k_hist, k.reshape(1,-1),axis =0)
             actions = np.append(actions, action.reshape(1,-1),axis=0)
             r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3]).reshape(1,-1),axis=0)
             inputs = np.append(inputs, input.reshape(1,-1),axis=0)
             D_hist = np.append(D_hist, d_tmp.reshape(1,-1),axis=0)
-            state = next_error_state
+
+            obs = next_error_state
+            state_hist = next_state_hist
 
     env.close()
     #-------------------------------結果のプロット----------------------------------
@@ -197,10 +208,11 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_quate_error.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.figure(figsize=(12,5),dpi=100)
     plt.subplot(231)
     plt.plot(np.arange(max_steps)*dt, w[:,0],label =r"$\omega_{x}$")
     plt.plot(np.arange(max_steps)*dt, w[:,1],label =r"$\omega_{y}$")
+    plt.plot(np.arange(max_steps)*dt, w[:,2],label =r"$\omega_{z}$")
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
