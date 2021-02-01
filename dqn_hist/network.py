@@ -170,8 +170,8 @@ class DDQNAgent:
         masks = batch.done
         # state_batch, action_batch, reward_batch, next_state_batch, masks = self.replay_buffer.sample(batch_size)
         state_batch = torch.FloatTensor(state_batch).to(self.device)
-        action_batch = torch.FloatTensor(action_batch).to(self.device)
-        reward_batch = torch.FloatTensor(reward_batch).to(self.device)
+        action_batch = torch.FloatTensor(action_batch).unsqueeze(1).to(self.device)
+        reward_batch = torch.FloatTensor(reward_batch).unsqueeze(1).to(self.device)
         next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
         masks = torch.FloatTensor(masks).to(self.device)
 
@@ -180,7 +180,7 @@ class DDQNAgent:
             expected_Q = reward_batch + self.gamma * next_Q
 
         a_ints = action_batch.type(torch.long)
-        q_eval = self.q_net(state_batch).gather(1, a_ints.unsqueeze(1))
+        q_eval = self.q_net(state_batch).gather(1, a_ints)
 
         # TD誤差を求める
         td_errors = expected_Q - q_eval
