@@ -116,7 +116,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     
                     if step > time_window:
                         agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
-                        td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
+                        # td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
                         agent.td_error_memory.push(0)
                     episode_reward += reward
 
