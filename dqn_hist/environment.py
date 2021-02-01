@@ -269,12 +269,12 @@ class SatelliteContinuousEnv(gym.Env):
             # reward += -0.01
             #状態と入力を抑えたい
             # reward = -(self.q_weight*((1-qe_new[0])**2) + self.w_weight/0.25*omega_new@omega_new + self.action_weight/0.04*action@action) 
-            self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
-            self.r2 = self.w_weight*omega_new@omega_new
-            self.r3 = self.action_weight*action@action
-            reward = -(self.r1 + self.r2 + self.r3) 
-            # pre = np.rad2deg(omega_new)
-            # reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
+            # self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
+            # self.r2 = self.w_weight*omega_new@omega_new
+            # self.r3 = self.action_weight*action@action
+            # reward = -(self.r1 + self.r2 + self.r3) 
+            pre = np.rad2deg(omega_new)
+            reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
             # if omega@omega < self.omega_thre and qe_new[0] >= self.angle_thre:
             #     reward = 0.1
             # elif qe_new[0] >= self.angle_thre:
