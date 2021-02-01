@@ -78,6 +78,7 @@ class TDerrorMemory:
         tmp_sum_absolute_td_error = 0
         for rand_num in rand_list:
             while tmp_sum_absolute_td_error < rand_num:
+                print(self.memory[idx])
                 tmp_sum_absolute_td_error += (
                     abs(self.memory[idx]) + TD_ERROR_EPSILON)
                 idx += 1
