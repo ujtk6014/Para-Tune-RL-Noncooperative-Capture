@@ -78,6 +78,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     
                     if step > time_window:
                         action = agent.get_action(state_hist, episode)
+                        action.flatten()
                     #----------------control law (Adaptive controller)-----------------------
                         n= str(Base_10_to_n(action,3))
                         while len(n) < 4:
@@ -115,14 +116,17 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     
                     if step > time_window:
                         agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
+                        td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
+                        agent.td_error_memory.push(td_error)
                     episode_reward += reward
 
                     # update the agent if enough transitions are stored in replay buffer
                     if len(agent.replay_buffer) > batch_size:
-                        agent.update(batch_size)
+                        agent.update(batch_size,episode)
 
                     if done or step == max_steps - 1:
                         episode_rewards.append(episode_reward)
+                        agent.update_td_error_memory()
                         # Count number of consecutive games with cumulative rewards >-55 for early stopping
                         if episode_reward > -55:
                             counter += 1
