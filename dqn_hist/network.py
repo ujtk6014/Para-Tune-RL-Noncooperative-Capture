@@ -186,6 +186,6 @@ class DDQNAgent:
         td_errors = expected_Q - q_eval
 
         # TD誤差メモリを更新、Tensorをdetach()で取り出し、NumPyにしてから、Pythonのリストまで変換
-        self.td_error_memory.memory = td_errors.detach().numpy().tolist()
+        self.td_error_memory.memory = td_errors.detach().to('cpu').numpy().tolist()
 
 
