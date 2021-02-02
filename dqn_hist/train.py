@@ -466,7 +466,7 @@ def env_adaptive():
     q = np.empty((0,4))
     w = np.empty((0,3))
     actions = np.empty((0,3))
-    r_hist = np.empty((0,3))
+    r_hist = np.empty((0,1))
 
     #----------------------control parameters----------------------------
     alpha = 0.5
@@ -484,18 +484,11 @@ def env_adaptive():
 
     for i in range(1, max_steps):
         action = np.squeeze(action)
-
-        # if i == 20/dt:
-        #     env.inertia = env.inertia_comb
-        #     env.inertia_inv = np.linalg.inv(env.inertia)
-        #     env.pre_state[-3:] += np.deg2rad([5,-5,5])
-        #     env.state[-3:] += np.deg2rad([5,-5,5])
-        
         next_error_state, reward, done, next_state, _ = env.step(action)
         q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
         qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
         w=np.append(w,next_error_state[4:7].reshape(1,-1),axis=0)
-        r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3]).reshape(1,-1),axis=0)
+        r_hist = np.append(r_hist, reward)
         total_r += reward
     #----------------control law (Adaptive controller)-----------------------
         W = next_error_state[4:7]
@@ -617,10 +610,7 @@ def env_adaptive():
     
     # plt.figure(figsize=(yoko,tate),dpi=100)
     plt.subplot(236)
-    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0],label = r"$q$ pnlty")
-    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
-    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
-    plt.plot(np.arange(max_steps-1)*dt, r_hist[:,0]+r_hist[:,1]+r_hist[:,2],label = r"$toal$",linestyle='dotted')
+    plt.plot(np.arange(max_steps-1)*dt, r_hist,label = r"reward")
     # plt.title('Action')
     plt.ylabel('reward')
     plt.xlabel(r'time [s]')

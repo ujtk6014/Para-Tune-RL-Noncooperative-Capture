@@ -180,8 +180,8 @@ class SatelliteContinuousEnv(gym.Env):
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5
         self.angle_thre = 0.999962
-        self.soft_angle_thre = 0.99
-        self.omega_thre = 0.000001
+        self.soft_angle_thre = 0
+        self.omega_thre = 1.5e-5
         self.max_action = 1
         self.time_window = 5
         self.omega_count = 5
@@ -273,17 +273,16 @@ class SatelliteContinuousEnv(gym.Env):
             # self.r2 = self.w_weight*omega_new@omega_new
             # self.r3 = self.action_weight*action@action
             # reward = -(self.r1 + self.r2 + self.r3) 
-            pre = np.rad2deg(omega_new)
-            reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
-            # if omega@omega < self.omega_thre and qe_new[0] >= self.angle_thre:
-            #     reward = 0.1
-            # elif qe_new[0] >= self.angle_thre:
-            #     reward = 0.1*np.array([1,-1,-1,-1])@np.power(qe,2)
-            # else:
-            #     if qe_new[0] > qe[0]:
-            #         reward = 0.01
-            #     else:
-            #         reward = -0.01
+            # pre = np.rad2deg(omega_new)
+            # reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
+            reward = -0.01
+            if omega@omega < self.omega_thre:
+                reward += 0.5
+            else:
+                if omega_new@omega_new < omega@omega:
+                    reward += 0.1
+                else:
+                    reward += -0.1
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
@@ -295,7 +294,7 @@ class SatelliteContinuousEnv(gym.Env):
                 reward = -10
             elif done_4:
                 print("done_4")
-                reward = 1
+                reward = 0
             else:
                 print("done_2")
                 reward = 0
@@ -306,7 +305,7 @@ class SatelliteContinuousEnv(gym.Env):
                 logger.warn("You are calling 'step()' even though this environment has already returned done = True. You should always call 'reset()' once you receive 'done = True' -- any further steps are undefined behavior.")
             self.steps_beyond_done += 1
             reward = 0.0
-
+        reward = reward/(0.01*(175+25*self.multi))
         return self.state, reward, done, self.pre_state, {}
 
     def reset(self):
