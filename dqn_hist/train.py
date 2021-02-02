@@ -70,8 +70,8 @@ def evaluate():
 
     curr_dir = os.path.abspath(os.getcwd())
 
-    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl",map_location='cpu')
-    agent.device = torch.device('cpu')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")#,map_location='cpu')
+    # agent.device = torch.device('cpu')
     agent.train = False
 
     obs = env.reset()
