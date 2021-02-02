@@ -108,22 +108,32 @@ def evaluate():
                 n= str(Base_10_to_n(action,3))
                 while len(n) < 4:
                     n ="0"+n
-                para = np.empty((4,1))
+                sign = [0]*4
                 for i in range(4):
                     if n[i] == '0':
-                        para[i] = 1
+                        sign[i] = 1
                     elif n[i] == '1':
-                        para[i] = 0
+                        sign[i] = 0
                     elif n[i] == '2':
-                        para[i] = -1
-
-                    k += k_delta * para[0]
-                    D[0,0] += D_delta * para[1]
-                    D[4,4] += D_delta * para[2]
-                    D[8,8] += D_delta * para[3]
+                        sign[i] = -1
+                    para = [k,D[0,0],D[4,4],D[8,8]]
+                    para_exp = [np.log10(para[i]) for i in range(len(para))]
+                    para_exp_f = [np.floor(para_exp[i]) for i in range(len(para))]
+                    delta_tmp = [0]*len(para)
+                    delta_tmp[0] = para_exp_f[0]-1 if para_exp[0].is_integer() else para_exp_f[0]
+                    delta_tmp[0] = -2.0 if delta_tmp[0] >= -2 else delta_tmp[0]
+                    delta_tmp[1:] = [para_exp_f[i+1]-1 if para_exp[i+1].is_integer() else para_exp_f[i+1] for i in range(len(para)-1)]
+                    delta_tmp[1:] = [-5.0 if delta_tmp[i+1] >=-5  else delta_tmp[i+1] for i in range(len(para)-1)]
+                    delta = [10**(delta_tmp[i]) for i in range(len(delta_tmp))]
+                    for i in range(len(para)):
+                        para[i] += delta[i]*sign[i]
+                    k = para[0]
+                    D[0,0] = para[1]
+                    D[4,4] = para[2]
+                    D[8,8] = para[3]
+                    sign = [0]*4
                     if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
-                        env.neg_param_flag = True
-                    para = np.empty((4,1))
+                        env.neg_param_flag = False
             else:
                 action = np.array([0])
             W = obs[4:7]
@@ -147,7 +157,8 @@ def evaluate():
             w=np.append(w,next_error_state[4:7].reshape(1,-1),axis=0)
             total_r += reward
             d_tmp = np.array([D[0,0],D[4,4],D[8,8]])
-            k_hist = np.append(k_hist, k.reshape(1,-1),axis =0)
+            k_tmp = np.array(k)
+            k_hist = np.append(k_hist, k_tmp.reshape(1,-1),axis =0)
             actions = np.append(actions, action.reshape(1,-1),axis=0)
             r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3]).reshape(1,-1),axis=0)
             inputs = np.append(inputs, input.reshape(1,-1),axis=0)
