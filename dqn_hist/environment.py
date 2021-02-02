@@ -276,14 +276,13 @@ class SatelliteContinuousEnv(gym.Env):
             pre = np.rad2deg(omega_new)
             reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
             # if omega@omega < self.omega_thre and qe_new[0] >= self.angle_thre:
-            #     reward = 0.1
-            # elif qe_new[0] >= self.angle_thre:
-            #     reward = 0.1*np.array([1,-1,-1,-1])@np.power(qe,2)
+            #     pre = np.rad2deg(omega_new)
+            #     reward = 1/np.sqrt(2*np.pi)*np.exp(-1/2*(pre@pre))
             # else:
-            #     if qe_new[0] > qe[0]:
-            #         reward = 0.01
+            #     if omega_new@omega_new < omega@omega:
+            #         reward = 0.1
             #     else:
-            #         reward = -0.01
+            #         reward = -0.1
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
@@ -294,7 +293,7 @@ class SatelliteContinuousEnv(gym.Env):
                 print("done_3")
                 reward = -10
             elif done_4:
-                print("done_4")
+                # print("done_4")
                 reward = 1
             else:
                 print("done_2")
@@ -314,7 +313,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,300)/100
+        # self.multi = np.random.randint(100,300)/100
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
