@@ -90,7 +90,7 @@ def evaluate():
     k_delta = 0.01
     D_delta = 1e-5
     alpha = 0.5
-    k = np.array([0.8])
+    k = 0.8
     D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
     dt = env.dt
     simutime = 30
