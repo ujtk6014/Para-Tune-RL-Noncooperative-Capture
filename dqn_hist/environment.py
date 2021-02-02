@@ -178,11 +178,11 @@ class SatelliteContinuousEnv(gym.Env):
         self.max_steps = 300
 
         # Angle, angle speed and speed at which to fail the episode
-        self.maxOmega = 50
+        self.maxOmega = 5
         self.angle_thre = 0.999962
         self.soft_angle_thre = 0.99
         self.omega_thre = 0.000001
-        self.max_action = 100
+        self.max_action = 1
         self.time_window = 5
         self.omega_count = 5
         #------------------------------------------------------------------------------------------------------------

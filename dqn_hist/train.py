@@ -117,7 +117,7 @@ def evaluate():
                     elif n[i] == '2':
                         sign[i] = -1
                     para = [k,D[0,0],D[4,4],D[8,8]]
-                    para_exp = [np.log10(para[i]) for i in range(len(para))]
+                    para_exp = [np.log10(para[i]) if i==0 else np.log10(para[i]-1e-4) for i in range(len(para))]
                     para_exp_f = [np.floor(para_exp[i]) for i in range(len(para))]
                     delta_tmp = [0]*len(para)
                     delta_tmp[0] = para_exp_f[0]-1 if para_exp[0].is_integer() else para_exp_f[0]
@@ -224,8 +224,10 @@ def evaluate():
     plt.plot(np.arange(max_steps)*dt, w[:,0],label =r"$\omega_{x}$")
     plt.plot(np.arange(max_steps)*dt, w[:,1],label =r"$\omega_{y}$")
     plt.plot(np.arange(max_steps)*dt, w[:,2],label =r"$\omega_{z}$")
+    plt.ylabel('angular velocity [rad/s]')
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
+    # plt.ylim(-5, 5)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_omega.png")
 
@@ -239,8 +241,9 @@ def evaluate():
     plt.xlabel(r'time [s]')
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
-    # plt.ylim(-0.3, 0.25)
+    # plt.ylim(-1, 1)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    print(input.min)
     # plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_torque.png")
 
     angle = np.array([np.rad2deg(env.dcm2euler(env.quaternion2dcm(q[i,:]))).tolist() for i in range(max_steps-1)])
@@ -278,7 +281,8 @@ def evaluate():
     plt.xlabel(r'time [s]')
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
-    # plt.ylim(-20, 20)
+    # plt.ylim(0, 1e-6)
+    plt.xlim(0, 15)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_d.png")
 
@@ -490,14 +494,14 @@ def env_adaptive():
         next_error_state, reward, done, next_state, _ = env.step(action)
         q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
         qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
-        w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
+        w=np.append(w,next_error_state[4:7].reshape(1,-1),axis=0)
         r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3]).reshape(1,-1),axis=0)
         total_r += reward
     #----------------control law (Adaptive controller)-----------------------
-        W = next_error_state[8:11]
+        W = next_error_state[4:7]
         x1 = next_error_state[1:4]
         x2 = alpha*x1 + W
-        dqe = next_error_state[4:8]
+        dqe = env.quaternion_differential(W,next_error_state[0:4])
         Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
              [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
               [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
