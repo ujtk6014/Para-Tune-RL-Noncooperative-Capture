@@ -646,6 +646,7 @@ def reward_test():
 
     for j in range(100,500):
         action = np.array([0,0,0]).reshape(1,3)
+        #envのmultiを消す
         env.multi = j/100
         env.reset()
         total_r = 0
