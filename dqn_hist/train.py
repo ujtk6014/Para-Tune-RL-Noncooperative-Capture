@@ -620,11 +620,101 @@ def env_adaptive():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
 
     plt.savefig(curr_dir + "/results/adap_test/results.png")
-    plt.show()    
+    plt.show() 
+
+def reward_test():
+
+    # simulation of the agent solving the cartpole swing-up problem
+    env = make("SatelliteContinuous")
+    # uncomment for recording a video of simulation
+    # env = wrappers.Monitor(env, './video', force=True)
+
+    curr_dir = os.path.abspath(os.getcwd())
+    r_hist = np.empty((0,1))
+    t_hist = np.empty((0,1))
+
+    #----------------------control parameters----------------------------
+    alpha = 0.5
+    k = 0.8
+    zeta = 0.2
+    D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
+    #--------------------------------------------------------------------
+
+    dt = env.dt
+    simutime = env.max_steps/10
+    max_steps = int(simutime/dt) -1 # dt is 0.01
+
+    for j in range(100,500):
+        action = np.array([0,0,0]).reshape(1,3)
+        env.multi = j/100
+        env.reset()
+        total_r = 0
+        t_last = 0
+        Done = False
+        th = env.inertia_comb.flatten()
+        th_e = np.array(env.inertia.flatten())
+        for i in range(1, max_steps):
+            action = np.squeeze(action)
+            next_error_state, reward, done, next_state, _ = env.step(action)
+            total_r += reward
+        #----------------control law (Adaptive controller)-----------------------
+            W = next_error_state[4:7]
+            x1 = next_error_state[1:4]
+            x2 = alpha*x1 + W
+            dqe = env.quaternion_differential(W,next_error_state[0:4])
+            Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
+                [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
+                [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
+            action = -0.5*x1 -Y@th_e - k*x2
+
+            dth = np.linalg.inv(D) @ Y.T @ x2
+            th_e += dt*dth
+            if not Done:
+                if done:
+                    t_last = i
+                    Done = True
+                    break
+        #---------------------------------------------------------------------
+        # print("Total Reward is : " + str(total_r))
+        r_hist = np.append(r_hist, total_r)
+        t_hist = np.append(t_hist, t_last)
+    
+    # plot the angle and action curve
+    #-------------------plot settings------------------------------
+    plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
+    plt.rcParams['mathtext.fontset'] = 'stix' # math fontの設定
+    plt.rcParams["font.size"] = 10 # 全体のフォントサイズが変更されます。
+    plt.rcParams['xtick.labelsize'] = 10 # 軸だけ変更されます。
+    plt.rcParams['ytick.labelsize'] = 10 # 軸だけ変更されます 
+    plt.rcParams['xtick.direction'] = 'in' # x axis in
+    plt.rcParams['ytick.direction'] = 'in' # y axis in 
+    plt.rcParams['axes.linewidth'] = 1.0 # axis line width
+    plt.rcParams['axes.grid'] = True # make grid
+    #------------------------------------------------
+    plt.figure(figsize=(4,6),dpi=100)
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.3, hspace=0.3)
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(211)
+    plt.plot(np.arange(1, 5.0, 0.01), r_hist,label = r"$\reward$")
+    plt.ylabel('rewards')
+    plt.xlabel(r'target multi')
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+
+    plt.subplot(212)
+    plt.plot(np.arange(1, 5.0, 0.01),t_hist,label = r"$\time$")
+    plt.ylabel('elasped time')
+    plt.xlabel(r'target multi')
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    plt.show()
 
 if __name__ == '__main__':
     plt.close()
-    val = input('Enter the number 1:train 2:evaluate 3:env_pd  4:env_adaptive  > ')
+    val = input('Enter the number 1:train 2:evaluate 3:env_pd  4:env_adaptive 5:reward_test > ')
     if val == '1':
         train()
     elif val == '2':
@@ -633,5 +723,7 @@ if __name__ == '__main__':
         env_pd()
     elif val == '4':
         env_adaptive()
+    elif val == '5':
+        reward_test()
     else:
         print("You entered the wrong number, run again and choose from 1 or 2 or 3.")
