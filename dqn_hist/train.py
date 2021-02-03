@@ -149,7 +149,7 @@ def evaluate():
             th_e += env.dt*dth
             # action = np.squeeze(action)
             next_error_state, reward, done, next_state, _ = env.step(input)
-            next_state_hist[1:] = next_state_hist[0:-1]
+            next_state_hist[state_num:] = next_state_hist[:-state_num]
             next_state_hist[:state_num] = next_error_state
 
             q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
