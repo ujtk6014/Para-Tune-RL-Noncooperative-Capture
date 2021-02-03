@@ -116,24 +116,24 @@ def evaluate():
                         sign[i] = 0
                     elif n[i] == '2':
                         sign[i] = -1
-                    para = [k,D[0,0],D[4,4],D[8,8]]
-                    para_exp = [np.log10(para[i]) if i==0 else np.log10(para[i]-1e-4) for i in range(len(para))]
-                    para_exp_f = [np.floor(para_exp[i]) for i in range(len(para))]
-                    delta_tmp = [0]*len(para)
-                    delta_tmp[0] = para_exp_f[0]-1 if para_exp[0].is_integer() else para_exp_f[0]
-                    delta_tmp[0] = -2.0 if delta_tmp[0] >= -2 else delta_tmp[0]
-                    delta_tmp[1:] = [para_exp_f[i+1]-1 if para_exp[i+1].is_integer() else para_exp_f[i+1] for i in range(len(para)-1)]
-                    delta_tmp[1:] = [-5.0 if delta_tmp[i+1] >=-5  else delta_tmp[i+1] for i in range(len(para)-1)]
-                    delta = [10**(delta_tmp[i]) for i in range(len(delta_tmp))]
-                    for i in range(len(para)):
-                        para[i] += delta[i]*sign[i]
-                    k = para[0]
-                    D[0,0] = para[1]
-                    D[4,4] = para[2]
-                    D[8,8] = para[3]
-                    sign = [0]*4
-                    if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
-                        env.neg_param_flag = False
+                para = [k,D[0,0],D[4,4],D[8,8]]
+                para_exp = [np.log10(para[i]) if i==0 else np.log10(para[i]-1e-4) for i in range(len(para))]
+                para_exp_f = [np.floor(para_exp[i]) for i in range(len(para))]
+                delta_tmp = [0]*len(para)
+                delta_tmp[0] = para_exp_f[0]-1 if para_exp[0].is_integer() else para_exp_f[0]
+                delta_tmp[0] = -2.0 if delta_tmp[0] >= -2 else delta_tmp[0]
+                delta_tmp[1:] = [para_exp_f[i+1]-1 if para_exp[i+1].is_integer() else para_exp_f[i+1] for i in range(len(para)-1)]
+                delta_tmp[1:] = [-5.0 if delta_tmp[i+1] >=-5  else delta_tmp[i+1] for i in range(len(para)-1)]
+                delta = [10**(delta_tmp[i]) for i in range(len(delta_tmp))]
+                for i in range(len(para)):
+                    para[i] += delta[i]*sign[i]
+                k = para[0]
+                D[0,0] = para[1]
+                D[4,4] = para[2]
+                D[8,8] = para[3]
+                sign = [0]*4
+                if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
+                    env.neg_param_flag = False
             else:
                 action = np.array([0])
             W = obs[4:7]
