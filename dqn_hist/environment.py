@@ -76,7 +76,7 @@ class SatelliteContinuousEnv(gym.Env):
             q[3]=(dcm[2,0]+dcm[0,2])/(4*q[1])
             q[2]=(dcm[0,1]+dcm[1,0])/(4*q[1])
             if q[0] < 0:
-                q = -q           
+                q = -q
         elif j==2: # %ε(2)が最大の場合
             q[0]=(dcm[2,0]-dcm[0,2])/(4*q[2])
             q[3]=(dcm[1,2]+dcm[2,1])/(4*q[2])
@@ -139,9 +139,9 @@ class SatelliteContinuousEnv(gym.Env):
         self.simutime =30
         
         #報酬パラメータ
-        self.q_weight =  1*15
-        self.w_weight = 1.5*80
-        self.action_weight = 0.25*5
+        self.q_weight =  1*20
+        self.w_weight = 1.5*100
+        self.action_weight = 0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -186,7 +186,6 @@ class SatelliteContinuousEnv(gym.Env):
         self.time_window = 5
         self.omega_count = 5
         #------------------------------------------------------------------------------------------------------------
-
         # 状態量（姿勢角４・角速度３）
         high = np.ones(7*self.time_window,dtype = np.float32)*np.finfo(np.float32).max
 
@@ -305,7 +304,8 @@ class SatelliteContinuousEnv(gym.Env):
                 logger.warn("You are calling 'step()' even though this environment has already returned done = True. You should always call 'reset()' once you receive 'done = True' -- any further steps are undefined behavior.")
             self.steps_beyond_done += 1
             reward = 0.0
-        reward = reward/(0.01*(175+25*self.multi))
+        # reward = reward/(0.01*(175+25*self.multi))
+        reward = reward/(0.1*(13+28*self.multi))
         return self.state, reward, done, self.pre_state, {}
 
     def reset(self):
@@ -313,7 +313,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,300)/100
+        # self.multi = np.random.randint(100,300)/100
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)

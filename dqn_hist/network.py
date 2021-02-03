@@ -57,7 +57,6 @@ class DDQNAgent:
         self.lr = learning_rate
         self.train = train
 
-
         self.mid_dim = 512
         self.explore_rate = 0.5
         self.softmax = nn.Softmax(dim=1)
