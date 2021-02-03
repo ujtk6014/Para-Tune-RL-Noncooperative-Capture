@@ -92,7 +92,7 @@ class DDQNAgent:
         return a_int
 
     def update(self,batch_size, episode):
-        if episode < 30:
+        if episode > 0:
             transitions = self.replay_buffer.sample(batch_size)
         else:
             # TD誤差に応じてミニバッチを取り出すに変更
