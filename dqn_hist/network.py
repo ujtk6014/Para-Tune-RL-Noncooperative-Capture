@@ -27,7 +27,7 @@ class QNetDuel(nn.Module):
 
         self.net__head = nn.Sequential(
             nn.Linear(state_dim, mid_dim), nn.ReLU(),
-            nn.Linear(mid_dim, mid_dim), nn.ReLU(),
+            # nn.Linear(mid_dim, mid_dim), nn.ReLU(),
         )
         self.net_val = nn.Sequential(  # value
             nn.Linear(mid_dim, mid_dim), nn.ReLU(),
@@ -40,9 +40,9 @@ class QNetDuel(nn.Module):
 
     def forward(self, state):
         x = self.net__head(state)
-        val = self.net_val(x)
         adv = self.net_adv(x)
-        q = val + adv - adv.mean(dim=1, keepdim=True)
+        val = self.net_val(x).expand(-1, adv.size(1))
+        q = val + adv - adv.mean(dim=1, keepdim=True).expand(-1, adv.size(1))
         return q
 
 class DDQNAgent:
@@ -78,17 +78,11 @@ class DDQNAgent:
     def get_action(self, state, episode=0):
         epsilon = 0.5 *( 1/(0.1*episode + 1) )
         state = torch.FloatTensor(state.flatten()).unsqueeze(0).to(self.device)
-        actions = self.q_net(state)
-        # if self.train == True:
-        #     if rd.rand() < self.explore_rate:
-        #         a_prob = self.softmax(actions).cpu().data.numpy()[0]
-        #         a_int = rd.choice(self.action_dim, p=a_prob)
-        #     else:
-        #         a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
-        # else:
-        #     a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
+        self.q_net.eval()
+        with torch.no_grad():
+            actions = self.q_net(state)
         if self.train == True:
-            if epsilon < rd.rand():
+            if epsilon <= rd.uniform(0,1):
                 a_int = actions.argmax(dim=1).cpu().data.numpy()[0]
             else:
                 a_prob = self.softmax(actions).cpu().data.numpy()[0]
@@ -118,8 +112,12 @@ class DDQNAgent:
         next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
         masks = torch.FloatTensor(masks).to(self.device)
 
+        self.q_net.eval()
+        self.q_net_target.eval()
         with torch.no_grad():
-            next_Q = self.q_net_target(next_state_batch).max(dim=1, keepdim=True)[0]
+            a_m = self.q_net(next_state_batch)
+            a_m_ints = a_m.argmax(dim=1,keepdim=True)
+            next_Q = self.q_net_target(next_state_batch).gather(1, a_m_ints)
             expected_Q = reward_batch + self.gamma * next_Q
         
         self.q_net.train()
@@ -133,8 +131,9 @@ class DDQNAgent:
 
         if episode % 2 ==0:
             # update target networks
-            for target_param, param in zip(self.q_net_target.parameters(), self.q_net.parameters()):
-                target_param.data.copy_(param.data)
+            self.q_net_target.load_state_dict(self.q_net.state_dict())
+            # for target_param, param in zip(self.q_net_target.parameters(), self.q_net.parameters()):
+            #     target_param.data.copy_(param.data)
 
             # target_param.data.copy_(param.data * self.tau + target_param.data * (1.0 - self.tau))
     
@@ -142,6 +141,8 @@ class DDQNAgent:
         state = torch.FloatTensor(state.flatten()).unsqueeze(0).to(self.device)
         next_state = torch.FloatTensor(next_state.flatten()).unsqueeze(0).to(self.device)
         action = torch.FloatTensor(action.flatten()).to(self.device)
+        self.q_net.eval()
+        self.q_net_target.eval()
         with torch.no_grad():
             next_Q = self.q_net_target(next_state).max(dim=1, keepdim=True)[0]
             expected_Q = reward + self.gamma * next_Q

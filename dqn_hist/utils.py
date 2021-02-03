@@ -137,11 +137,6 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     if done or step == max_steps - 1:
                         episode_rewards.append(episode_reward)
                         agent.update_td_error_memory()
-                        # Count number of consecutive games with cumulative rewards >-55 for early stopping
-                        if episode_reward > -55:
-                            counter += 1
-                        else:   
-                            counter = 0
                         print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
                         break
                     

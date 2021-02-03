@@ -12,7 +12,7 @@ from network import DDQNAgent
 from utils import *
 
 
-def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max_steps=300, gamma=0.99, tau=1e-2,
+def train(batch_size=256, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max_steps=300, gamma=0.99, tau=1e-2,
           buffer_maxlen=100000):
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
@@ -26,7 +26,7 @@ def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max
     buffer_maxlen = buffer_maxlen
     critic_lr = critic_lr
     actor_lr = actor_lr
-    learning_rate = 1e-3
+    learning_rate = 1e-4
 
     time_window = env.time_window
 
