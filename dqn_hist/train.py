@@ -70,12 +70,12 @@ def evaluate():
 
     curr_dir = os.path.abspath(os.getcwd())
 
-    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")#,map_location='cpu')
-    # agent.device = torch.device('cpu')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl",map_location='cpu')
+    agent.device = torch.device('cpu')
     agent.train = False
 
     obs = env.reset()
-    print("The goal angle is :" + str(np.rad2deg(env.goalEuler)) +"\n")
+    print("Target multi is:" + str(env.multi) +"\n")
     total_r = 0
     qe = np.empty((0,4))
     q = np.empty((0,4))
@@ -117,7 +117,7 @@ def evaluate():
                     elif n[i] == '2':
                         sign[i] = -1
                 para = [k,D[0,0],D[4,4],D[8,8]]
-                para_exp = [np.log10(para[i]) if i==0 else np.log10(para[i]-1e-4) for i in range(len(para))]
+                para_exp = [np.log10(para[i]) if i==0 else np.log10(para[i]-1e-5) for i in range(len(para))]
                 para_exp_f = [np.floor(para_exp[i]) for i in range(len(para))]
                 delta_tmp = [0]*len(para)
                 delta_tmp[0] = para_exp_f[0]-1 if para_exp[0].is_integer() else para_exp_f[0]
@@ -270,6 +270,7 @@ def evaluate():
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_k.png")
+    print('Last k:' + str(k_hist[-1,0]))
 
     # plt.figure(figsize=(yoko,tate),dpi=100)
     plt.subplot(235)
@@ -282,9 +283,12 @@ def evaluate():
     plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
     plt.tight_layout()
     # plt.ylim(0, 1e-6)
-    plt.xlim(0, 15)
+    # plt.xlim(0, 15)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_d.png")
+    print('Last D1:' + str(D_hist[-1,0]))
+    print('Last D2:' + str(D_hist[-1,1]))
+    print('Last D3:' + str(D_hist[-1,2]))
 
     # plt.figure(figsize=(yoko,tate),dpi=100)
     plt.subplot(236)
@@ -297,6 +301,7 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/dqn_hist_eval/plot_action.png")
     plt.savefig(curr_dir + "/results/dqn_hist_eval/results.png")
+    print('Last action:' + str(actions[-1,0]))
 
     plt.figure(figsize=(yoko,tate),dpi=100)
     plt.plot(np.arange(max_steps)*dt, r_hist[:,0],label = r"$q$ pnlty")
@@ -461,6 +466,7 @@ def env_adaptive():
     curr_dir = os.path.abspath(os.getcwd())
     env.reset()
     print('Initial omega is:' + str(np.rad2deg(env.startOmega)))
+    print("Target multi is:" + str(env.multi) +"\n")
     total_r = 0
     qe = np.empty((0,4))
     q = np.empty((0,4))

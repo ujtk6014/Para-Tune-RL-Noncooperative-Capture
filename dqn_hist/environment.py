@@ -305,7 +305,7 @@ class SatelliteContinuousEnv(gym.Env):
             self.steps_beyond_done += 1
             reward = 0.0
         # reward = reward/(0.01*(175+25*self.multi))
-        reward = reward/(0.1*(13+28*self.multi))
+        # reward = reward/(0.1*(13+28*self.multi))
         return self.state, reward, done, self.pre_state, {}
 
     def reset(self):
@@ -325,7 +325,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
         coef = 2*np.random.randint(0,2,size=3)-1
-        self.startOmega = coef* np.deg2rad(np.array([5,-5,5]) + np.random.uniform(-1, 1, size=3))
+        self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)
         self.goalEuler = np.deg2rad(np.array([0,0,0]))
