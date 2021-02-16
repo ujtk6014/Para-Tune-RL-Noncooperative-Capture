@@ -94,7 +94,7 @@ class DDQNAgent:
         return a_int
 
     def update(self,batch_size, episode):
-        if self.prioritized:
+        if self.prioritized_on:
             if episode > 0:
                 transitions = self.replay_buffer.sample(batch_size)
             else:
