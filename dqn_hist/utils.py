@@ -90,9 +90,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                         para_exp_f = [np.floor(para_exp[i]) for i in range(len(para))]
                         delta_tmp = [0]*len(para)
                         delta_tmp[0] = para_exp_f[0]-1 if para_exp[0].is_integer() else para_exp_f[0]
-                        # delta_tmp[0] = -2.0 if delta_tmp[0] >= -2 else delta_tmp[0]
+                        delta_tmp[0] = -1.0 if delta_tmp[0] >= -1 else delta_tmp[0]
                         delta_tmp[1:] = [para_exp_f[i+1]-1 if para_exp[i+1].is_integer() else para_exp_f[i+1] for i in range(len(para)-1)]
-                        # delta_tmp[1:] = [-5.0 if delta_tmp[i+1] >=-5  else delta_tmp[i+1] for i in range(len(para)-1)]
+                        delta_tmp[1:] = [-5.0 if delta_tmp[i+1] >=-5  else delta_tmp[i+1] for i in range(len(para)-1)]
 
                         delta = [10**(delta_tmp[i]) for i in range(len(delta_tmp))]
                         for i in range(len(para)):
