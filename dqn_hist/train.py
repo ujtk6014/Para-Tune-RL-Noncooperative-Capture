@@ -22,7 +22,7 @@ def train():
         config={
         "batch_size": 256,
         "learning_rate": 1e-4,
-        "max_episodes": 10000,
+        "max_episodes": 10,
         "max_steps": 300,
         "gamma": 0.99,
         "tau": 1e-2,
