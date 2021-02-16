@@ -70,10 +70,10 @@ def train():
     date = datetime.datetime.now()
     date = '{0:%Y%m%d}'.format(date)
     curr_dir = os.path.abspath(os.getcwd())
-    plt.savefig(curr_dir + "/results/reward/dqn/plot_reward_"+ date + ".png")
+    # plt.savefig(curr_dir + "/results/reward/dqn/plot_reward_"+ date + ".png")
     if not os.path.isdir("models"):
         os.mkdir("models")
-    torch.save(agent, curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")
+    # torch.save(agent, curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")
 
 
 def evaluate():
