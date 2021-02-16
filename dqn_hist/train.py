@@ -10,31 +10,45 @@ import datetime
 
 from network import DDQNAgent
 from utils import *
+import wandb
 
 
-def train(batch_size=256, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max_steps=300, gamma=0.99, tau=1e-2,
-          buffer_maxlen=100000):
+def train():
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
 
-    max_episodes = max_episodes
-    max_steps = max_steps
-    batch_size = batch_size
+    #logger
+    wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
+        config={
+        "batch_size": 256,
+        "learning_rate": 1e-4,
+        "max_episodes": 10000,
+        "max_steps": 300,
+        "gamma": 0.99,
+        "tau": 1e-2,
+        "buffer_maxlen": 10000,
+        "prioritized_on": False,}
+    )
+    config = wandb.config
 
-    gamma = gamma
-    tau = tau
-    buffer_maxlen = buffer_maxlen
-    critic_lr = critic_lr
-    actor_lr = actor_lr
-    learning_rate = 1e-4
+    max_episodes = config.max_episodes
+    max_steps = config.max_steps
+    batch_size = config.batch_size
+
+    gamma = config.gamma
+    tau = config.tau
+    buffer_maxlen = config.buffer_maxlen
+    learning_rate = config.learning_rate
+    prioritized_on = config.prioritized_on
 
     time_window = env.time_window
 
-    agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps)
+    agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps, prioritized_on)
+    wandb.watch([agent.q_net,agent.q_net_target], log="all")
     #学習済みモデルを使うとき
     #curr_dir = os.path.abspath(os.getcwd())
     #agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")
-    episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window)
+    episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window, prioritized_on)
 
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
@@ -51,7 +65,7 @@ def train(batch_size=256, critic_lr=1e-3, actor_lr=1e-4, max_episodes=10000, max
     plt.plot(episode_rewards)
     plt.xlabel("Episodes")
     plt.ylabel("Reward")
-    plt.show()
+    # plt.show()
 
     date = datetime.datetime.now()
     date = '{0:%Y%m%d}'.format(date)

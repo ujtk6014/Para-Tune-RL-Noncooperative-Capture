@@ -3,7 +3,7 @@ from gym import make as gym_make
 from tqdm import tqdm
 from collections import OrderedDict
 import numpy as np
-
+import wandb
 
 def make(env_name, *make_args, **make_kwargs):
     if env_name == "SatelliteContinuous":
@@ -40,11 +40,6 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 
                     if done or step == max_steps - 1:
                         episode_rewards.append(episode_reward)
-                        # Count number of consecutive games with cumulative rewards >-55 for early stopping
-                        if episode_reward > -55:
-                            counter += 1
-                        else:   
-                            counter = 0
                         print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
                         break
                     # if counter == 10:
@@ -55,7 +50,7 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 
     return episode_rewards
 
-def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window):
+def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window,prioritized_on):
     episode_rewards = []
     counter = 0
     state_num = 7 #姿勢角４・角速度３
@@ -127,8 +122,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     
                     if step > time_window:
                         agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
-                        # td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
-                        # agent.td_error_memory.push(0)
+                        if prioritized_on:                            
+                            td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
+                            agent.td_error_memory.push(td_error)
                     episode_reward += reward
 
                     # update the agent if enough transitions are stored in replay buffer
@@ -137,7 +133,10 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
 
                     if done or step == max_steps - 1:
                         episode_rewards.append(episode_reward)
-                        # agent.update_td_error_memory()
+                        wandb.log({ "episode reward": episode_reward,
+                                    "loss": agent.loss_for_log})
+                        if prioritized_on:
+                            agent.update_td_error_memory()
                         print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
                         break
                     

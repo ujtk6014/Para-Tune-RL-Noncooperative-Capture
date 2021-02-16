@@ -46,7 +46,7 @@ class QNetDuel(nn.Module):
         return q
 
 class DDQNAgent:
-    def __init__(self, env, gamma, tau, buffer_maxlen, learning_rate, train, decay):
+    def __init__(self, env, gamma, tau, buffer_maxlen, learning_rate, train, decay, prioritized_on):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(self.device)
         self.env = env
@@ -56,6 +56,8 @@ class DDQNAgent:
         self.gamma = gamma
         self.lr = learning_rate
         self.train = train
+        self.loss_for_log = 0
+        self.prioritized_on = prioritized_on
 
         self.mid_dim = 512
         self.explore_rate = 0.5
@@ -92,12 +94,15 @@ class DDQNAgent:
         return a_int
 
     def update(self,batch_size, episode):
-        if episode > 0:
-            transitions = self.replay_buffer.sample(batch_size)
+        if self.prioritized:
+            if episode > 0:
+                transitions = self.replay_buffer.sample(batch_size)
+            else:
+                # TD誤差に応じてミニバッチを取り出すに変更
+                indexes = self.td_error_memory.get_prioritized_indexes(batch_size)
+                transitions = [self.replay_buffer.memory[n] for n in indexes]
         else:
-            # TD誤差に応じてミニバッチを取り出すに変更
-            indexes = self.td_error_memory.get_prioritized_indexes(batch_size)
-            transitions = [self.replay_buffer.memory[n] for n in indexes]
+            transitions = self.replay_buffer.sample(batch_size)
 
         batch = Transition(*zip(*transitions))
         state_batch = batch.state
@@ -120,10 +125,12 @@ class DDQNAgent:
             next_Q = self.q_net_target(next_state_batch).gather(1, a_m_ints)
             expected_Q = reward_batch + self.gamma * next_Q
         
-        self.q_net.train()
         a_ints = action_batch.type(torch.long)
         q_eval = self.q_net(state_batch).gather(1, a_ints)
+
+        self.q_net.train()
         critic_obj = self.criterion(q_eval, expected_Q)
+        self.loss_for_log = critic_obj.detach()
 
         self.q_net_optimizer.zero_grad()
         critic_obj.backward()
