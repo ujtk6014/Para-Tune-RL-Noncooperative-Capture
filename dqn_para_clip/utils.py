@@ -61,6 +61,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
             # pbar.set_description("[Train] Episode %d" % episode)
             state_hist = np.zeros(state_num*time_window)
             next_state_hist = np.zeros(state_num*time_window)
+            omega_error = np.zeros(time_window)
             obs = env.reset()
             th_e = np.array(env.inertia.flatten())
             episode_reward = 0    
@@ -68,58 +69,62 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
             k = 1
             d_tmp = [1000,1000,1000]
             D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
-            delta = [0.1,100,100,100]
-            for step in range(max_steps):
+            delta = [0.3,300,300,300]
+            for step in range(int(max_steps/time_window)):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
+                action = agent.get_action(state_hist, episode)
+                action.flatten()
+            #----------------control law (Adaptive controller)-----------------------
+                n= str(Base_10_to_n(action,3))
+                while len(n) < 4:
+                    n ="0"+n
+                sign = [0]*4
+                for i in range(4):
+                    if n[i] == '0':
+                        sign[i] = 1
+                    elif n[i] == '1':
+                        sign[i] = 0
+                    elif n[i] == '2':
+                        sign[i] = -1
+                para = [k,1/D[0,0],1/D[4,4],1/D[8,8]]
+                for i in range(len(para)):
+                    para[i] += delta[i]*sign[i]
+                para[0] = np.clip(para[0],1,10)
+                para[1:] = [np.clip(para[i+1],100,3000) for i in range(len(para)-1)]
+                k = para[0]
+                D[0,0] = 1/para[1]
+                D[4,4] = 1/para[2]
+                D[8,8] = 1/para[3]
+                sign = [0]*4
+                if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
+                    env.neg_param_flag = False
                 
-                if step > time_window:
-                    action = agent.get_action(state_hist, episode)
-                    action.flatten()
-                #----------------control law (Adaptive controller)-----------------------
-                    n= str(Base_10_to_n(action,3))
-                    while len(n) < 4:
-                        n ="0"+n
-                    sign = [0]*4
-                    for i in range(4):
-                        if n[i] == '0':
-                            sign[i] = 1
-                        elif n[i] == '1':
-                            sign[i] = 0
-                        elif n[i] == '2':
-                            sign[i] = -1
-                    para = [k,1/D[0,0],1/D[4,4],1/D[8,8]]
-                    for i in range(len(para)):
-                        para[i] += delta[i]*sign[i]
-                    para[0] = np.clip(para[0],1,10)
-                    para[1:] = [np.clip(para[i+1],100,3000) for i in range(len(para)-1)]
-                    k = para[0]
-                    D[0,0] = 1/para[1]
-                    D[4,4] = 1/para[2]
-                    D[8,8] = 1/para[3]
-                    sign = [0]*4
-                    if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
-                        env.neg_param_flag = False
-                W = obs[4:7]
-                x1 = obs[1:4]
-                x2 = alpha*x1 + W
-                dqe = env.quaternion_differential(W,obs[0:4])
-                Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
-                    [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
-                    [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
-                input = -0.5*x1 -Y@th_e - k*x2
+                for simu in range(time_window):
+                    W = obs[4:7]
+                    x1 = obs[1:4]
+                    x2 = alpha*x1 + W
+                    dqe = env.quaternion_differential(W,obs[0:4])
+                    Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
+                        [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
+                        [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
+                    input = -0.5*x1 -Y@th_e - k*x2
 
-                dth = np.linalg.inv(D) @ Y.T @ x2
-                th_e += env.dt*dth
-                #---------------------------------------------------------------------
-                next_error_state, reward, done, next_state, _ = env.step(input)
-                next_state_hist[state_num:] = next_state_hist[:-state_num]
-                next_state_hist[:state_num] = next_error_state
+                    dth = np.linalg.inv(D) @ Y.T @ x2
+                    th_e += env.dt*dth
+                    #---------------------------------------------------------------------
+                    next_error_state, _, done, next_state, _ = env.step(input)
+                    obs = next_error_state
+                    next_state_hist[state_num:] = next_state_hist[:-state_num]
+                    next_state_hist[:state_num] = next_error_state
+                    omega_error[1:] = omega_error[:-1]
+                    omega_error[0] = 1-x1[0]
                 
-                if step > time_window:
-                    agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
-                    if prioritized_on:                            
-                        td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
-                        agent.td_error_memory.push(td_error)
+                reward = -np.sum(omega_error)
+                
+                agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
+                if prioritized_on:                            
+                    td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
+                    agent.td_error_memory.push(td_error)
                 episode_reward += reward
 
                 # update the agent if enough transitions are stored in replay buffer
@@ -135,8 +140,8 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
                     break
                 
-                #状態量の更新
-                obs = next_error_state
+                # #状態量の更新
+                # obs = next_error_state
                 state_hist = next_state_hist
 
     except KeyboardInterrupt:
