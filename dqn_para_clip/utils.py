@@ -66,8 +66,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
             th_e = np.array(env.inertia.flatten())
             episode_reward = 0    
             alpha = 0.5
-            k = 1
-            d_tmp = [1000,1000,1000]
+            k = 2
+            d_tmp = 2500/9*env.multi + 2500/9-500
+            d_tmp = [d_tmp,d_tmp,d_tmp]
             D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
             delta = [0.3,300,300,300]
             for step in range(int(max_steps/time_window)):

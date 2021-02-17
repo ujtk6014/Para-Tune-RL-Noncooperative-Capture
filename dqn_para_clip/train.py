@@ -24,10 +24,10 @@ def train():
         "batch_size": 256,
         "learning_rate": 1e-4,
         "max_episodes": 10000,
-        "max_steps": 300,
+        "max_steps": 500,
         "gamma": 0.99,
         "tau": 1e-2,
-        "buffer_maxlen": 10000,
+        "buffer_maxlen": 100000,
         "prioritized_on": False,}
     )
     config = wandb.config
