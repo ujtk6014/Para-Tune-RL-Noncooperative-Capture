@@ -5,28 +5,52 @@ import matplotlib.pyplot as plt
 import torch
 from gym import wrappers 
 import numpy as np
+import wandb
 
 
 from network import TD3Agent
 from utils import *
 
 
-def train(batch_size=128, critic_lr=1e-3, actor_lr=1e-4, max_episodes=100000, max_steps=3000, gamma=0.99, tau=1e-3,
-          buffer_maxlen=100000):
+def train():
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
+    #logger
+    wandb.init(project='Satellite-continuous',
+        config={
+        "batch_size": 128,
+        "critic_lr": 1e-3,
+        "actor_lr": 1e-4,
+        "max_episodes": 10000,
+        "max_steps": 300,
+        "gamma": 0.99,
+        "tau" : 1e-3,
+        "buffer_maxlen": 100000,
+        "policy_noise": 0.2,
+        "policy_freq": 2,
+        "noise_clip": 0.5,
+        "prioritized_on": False,
+        "State": 'angle:4, ang_rate:4, ang_vel:3',}
+    )
+    config = wandb.config
 
-    max_episodes = max_episodes
-    max_steps = max_steps
-    batch_size = batch_size
+    max_episodes = config.max_episodes
+    max_steps = config.max_steps
+    batch_size = config.batch_size
 
-    gamma = gamma
-    tau = tau
-    buffer_maxlen = buffer_maxlen
-    critic_lr = critic_lr
-    actor_lr = actor_lr
+    policy_noise = config.policy_noise
+    policy_freq = config.policy_freq
+    noise_clip = config.noise_clip
 
-    agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps)
+    gamma = config.gamma
+    buffer_maxlen = config.buffer_maxlen
+    tau = config.tau
+    critic_lr = config.critic_lr
+    actor_lr = config.actor_lr
+
+    agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps,
+                    policy_freq, policy_noise, noise_clip)
+    wandb.watch([agent.critic,agent.actor], log="all")
     #学習済みモデルを使うとき
     # curr_dir = os.path.abspath(os.getcwd())
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")

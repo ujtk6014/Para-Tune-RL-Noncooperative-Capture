@@ -136,7 +136,7 @@ class SatelliteContinuousEnv(gym.Env):
 
         #シミュレーションパラメータ　
         self.dt = 0.1 
-        self.simutime =30
+        self.simutime =50
         
         #報酬パラメータ
         self.q_weight =  1*20
@@ -175,7 +175,7 @@ class SatelliteContinuousEnv(gym.Env):
 
         #---thresholds for episode-----------------------------------------------------------------------------------
         self.nsteps = 0  # timestep
-        self.max_steps = 300
+        self.max_steps = 500
 
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5

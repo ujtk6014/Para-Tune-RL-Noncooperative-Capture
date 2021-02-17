@@ -107,7 +107,8 @@ class Actor(nn.Module):
 
 
 class TD3Agent:
-    def __init__(self, env, gamma, tau, buffer_maxlen, critic_learning_rate, actor_learning_rate, train, decay):
+    def __init__(self, env, gamma, tau, buffer_maxlen, critic_learning_rate, actor_learning_rate, train, decay,
+                    policy_freq, policy_noise, noise_clip):
         self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         print(self.device)
         self.env = env
@@ -122,11 +123,14 @@ class TD3Agent:
         self.decay = decay
         self.max_action = env.max_action
         self.lower_action = env.lower_action
-        self.policy_noise = 0.2
-        self.noise_clip = 0.5
+        self.policy_noise = policy_noise
+        self.noise_clip = noise_clip
+
+        self.critic_loss_for_log = 0
+        self.actor_loss_for_log = 0
 
         #ポリシーの更新頻度
-        self.policy_freq = 2
+        self.policy_freq = policy_freq
         self.total_it = 0
 
         # initialize actor and critic networks

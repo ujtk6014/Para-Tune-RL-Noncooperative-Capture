@@ -131,9 +131,8 @@ class SatelliteContinuousEnv(gym.Env):
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
 
+        self.multi = np.random.randint(100,1000)/100
         self.est_th = np.diag(self.inertia)
-
-        self.multi = np.random.uniform(1, high=5)
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
@@ -141,8 +140,8 @@ class SatelliteContinuousEnv(gym.Env):
         self.g = np.array([0,0,0])  # gravity
 
         #シミュレーションパラメータ　
-        self.dt = 0.01 
-        self.simutime =30
+        self.dt = 0.1 
+        self.simutime =50
         
         #報酬パラメータ
         self.q_weight =  1
