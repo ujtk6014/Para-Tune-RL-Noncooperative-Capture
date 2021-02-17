@@ -62,6 +62,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
             state_hist = np.zeros(state_num*time_window)
             next_state_hist = np.zeros(state_num*time_window)
             omega_error = np.zeros(time_window)
+            window_reward = 0
             obs = env.reset()
             th_e = np.array(env.inertia.flatten())
             episode_reward = 0    
@@ -113,14 +114,15 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     dth = np.linalg.inv(D) @ Y.T @ x2
                     th_e += env.dt*dth
                     #---------------------------------------------------------------------
-                    next_error_state, _, done, next_state, _ = env.step(input)
+                    next_error_state, reward, done, next_state, _ = env.step(input)
                     obs = next_error_state
+                    window_reward += reward 
                     next_state_hist[state_num:] = next_state_hist[:-state_num]
                     next_state_hist[:state_num] = next_error_state
-                    omega_error[1:] = omega_error[:-1]
-                    omega_error[0] = 1-x1[0]
+                    # omega_error[1:] = omega_error[:-1]
+                    # omega_error[0] = 1-next_error_state[0]
                 
-                reward = -np.sum(omega_error)
+                reward = window_reward
                 
                 agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
                 if prioritized_on:                            
@@ -144,6 +146,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                 # #状態量の更新
                 # obs = next_error_state
                 state_hist = next_state_hist
+                window_reward = 0
 
     except KeyboardInterrupt:
         print('Training stopped manually!!!')
