@@ -13,43 +13,54 @@ from utils import *
 import wandb
 
 
-def train():
+def train(wandb_on = False):
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
 
-    #logger
-    wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
-        config={
-        "State": 'angle:4, ang_vel:3 * time_window',
-        "batch_size": 512,
-        "learning_rate": 1e-4,
-        "max_episodes": 10000,
-        "max_steps": 500,
-        "gamma": 0.99,
-        "tau": 1e-2,
-        "buffer_maxlen": 100000,
-        "prioritized_on": True,}
-    )
-    config = wandb.config
+    if wandb_on:
+        #logger
+        wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
+            config={
+            "State": 'angle:4, ang_vel:3 * time_window',
+            "batch_size": 512,
+            "learning_rate": 1e-4,
+            "max_episodes": 10000,
+            "max_steps": 500,
+            "gamma": 0.99,
+            "tau": 1e-2,
+            "buffer_maxlen": 100000,
+            "prioritized_on": True,}
+        )
+        config = wandb.config
+        max_episodes = config.max_episodes
+        max_steps = config.max_steps
+        batch_size = config.batch_size
 
-    max_episodes = config.max_episodes
-    max_steps = config.max_steps
-    batch_size = config.batch_size
+        gamma = config.gamma
+        tau = config.tau
+        buffer_maxlen = config.buffer_maxlen
+        learning_rate = config.learning_rate
+        prioritized_on = config.prioritized_on
+    else:
+        batch_size = 512
+        learning_rate= 1e-4
+        max_episodes= 10000
+        max_steps= 500
+        gamma= 0.99
+        tau= 1e-2
+        buffer_maxlen= 100000
+        prioritized_on= True
 
-    gamma = config.gamma
-    tau = config.tau
-    buffer_maxlen = config.buffer_maxlen
-    learning_rate = config.learning_rate
-    prioritized_on = config.prioritized_on
 
     time_window = env.time_window
 
     agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps, prioritized_on)
-    wandb.watch([agent.q_net,agent.q_net_target], log="all")
+    if wandb_on:
+        wandb.watch([agent.q_net,agent.q_net_target], log="all")
     #学習済みモデルを使うとき
     #curr_dir = os.path.abspath(os.getcwd())
     #agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")
-    episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window, prioritized_on)
+    episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window, prioritized_on, wandb_on)
 
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定

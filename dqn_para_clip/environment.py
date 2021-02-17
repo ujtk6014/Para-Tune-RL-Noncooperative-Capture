@@ -128,6 +128,7 @@ class SatelliteContinuousEnv(gym.Env):
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
         self.multi = np.random.uniform(1, high=2)
+        self.est_th = np.diag(self.inertia)/(10*np.diag(self.inertia))
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
@@ -183,16 +184,16 @@ class SatelliteContinuousEnv(gym.Env):
         self.soft_angle_thre = 0
         self.omega_thre = 1.5e-5
         self.max_action = 1
-        self.time_window = 5
+        self.time_window = 2
         self.omega_count = 5
         #------------------------------------------------------------------------------------------------------------
-        # 状態量（姿勢角４・角速度３）
-        high = np.ones(7*self.time_window,dtype = np.float32)*np.finfo(np.float32).max
+        # 状態量（姿勢角４・角速度３・推定パラメータ３）
+        high = np.ones(10*self.time_window,dtype = np.float32)*np.finfo(np.float32).max
 
         self.action_space = spaces.Discrete(81)
         self.observation_space = spaces.Box(-high, high)
         self.pre_state = np.hstack((self.startQuate,self.startOmega))
-        self.state = np.hstack((self.errorQuate,self.startOmega))
+        self.state = np.hstack((self.errorQuate,self.startOmega, self.est_th))
 
         #報酬系
         self.r1 = 0
@@ -214,7 +215,7 @@ class SatelliteContinuousEnv(gym.Env):
         
         pre_state = self.pre_state
         q = pre_state[:4]
-        omega = pre_state[-3:]
+        omega = pre_state[4:7]
         
         state = self.state
         qe = state[:4]
@@ -236,7 +237,7 @@ class SatelliteContinuousEnv(gym.Env):
         qe_new = self.error_Q @ q_new
 
         self.pre_state = np.hstack((q_new, omega_new))
-        self.state = np.hstack((qe_new,omega_new))
+        self.state = np.hstack((qe_new,omega_new,self.est_th))
 
         # とりまdoneはfalseにしておく
         # done = False
@@ -313,6 +314,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
+        self.est_th = np.diag(self.inertia)/(10*np.diag(self.inertia))
         self.multi = np.random.randint(100,1000)/100
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia

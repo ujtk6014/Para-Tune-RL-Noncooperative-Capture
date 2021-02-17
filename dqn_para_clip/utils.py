@@ -50,10 +50,10 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 
     return episode_rewards
 
-def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window,prioritized_on):
+def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, time_window,prioritized_on, wandb_on):
     episode_rewards = []
     counter = 0
-    state_num = 7 #姿勢角４・角速度３
+    state_num = 10 #姿勢角４・角速度３・推定パラ３
     try:
         # with tqdm(range(max_episodes),leave=False) as pbar:
         #     for episode, ch in enumerate(pbar):
@@ -71,7 +71,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
             d_tmp = 2500/9*env.multi + 2500/9-500
             d_tmp = [d_tmp,d_tmp,d_tmp]
             D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
-            delta = [0.3,300,300,300]
+            delta = [0.2,200,200,200]
             for step in range(int(max_steps/time_window)):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
                 action = agent.get_action(state_hist, episode)
@@ -113,6 +113,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
 
                     dth = np.linalg.inv(D) @ Y.T @ x2
                     th_e += env.dt*dth
+                    env.est_th = [th_e[0],th_e[4],th_e[8]]/(10*np.diag(env.inertia))
                     #---------------------------------------------------------------------
                     next_error_state, reward, done, next_state, _ = env.step(input)
                     obs = next_error_state
@@ -136,8 +137,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
 
                 if done or step == max_steps - 1:
                     episode_rewards.append(episode_reward)
-                    wandb.log({ "episode reward": episode_reward,
-                                "loss": agent.loss_for_log})
+                    if wandb_on:
+                        wandb.log({ "episode reward": episode_reward,
+                                    "loss": agent.loss_for_log})
                     if prioritized_on:
                         agent.update_td_error_memory()
                     print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")

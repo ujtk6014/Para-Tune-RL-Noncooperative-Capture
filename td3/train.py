@@ -16,13 +16,13 @@ def train():
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
     #logger
-    wandb.init(project='Satellite-continuous',
+    wandb.init(project='Para-Tune-RL-TD3',
         config={
         "batch_size": 128,
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
         "max_episodes": 10000,
-        "max_steps": 300,
+        "max_steps": 500,
         "gamma": 0.99,
         "tau" : 1e-3,
         "buffer_maxlen": 100000,
@@ -74,12 +74,12 @@ def train():
     plt.plot(episode_rewards)
     plt.xlabel("Episodes")
     plt.ylabel("Reward")
-    plt.show()
-    plt.savefig(curr_dir + "/results/td3_eval/plot_training_reward.png")
+    # plt.show()
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_training_reward.png")
 
     if not os.path.isdir("models"):
         os.mkdir("models")
-    torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
+    # torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
 
 
 def evaluate():

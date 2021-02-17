@@ -3,6 +3,7 @@ from gym import make as gym_make
 from tqdm import tqdm
 from collections import OrderedDict
 import numpy as np
+import wandb
 
 
 def make(env_name, *make_args, **make_kwargs):
@@ -101,6 +102,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
 
                 if done or step == max_steps - 1:
                     episode_rewards.append(episode_reward)
+                    wandb.log({ "episode reward": episode_reward,
+                                "critic_loss": agent.critic_loss_for_log,
+                                "actor_loss": agent.actor_loss_for_log})
 
                     print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
                     break

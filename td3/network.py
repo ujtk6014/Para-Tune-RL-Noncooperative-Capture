@@ -35,9 +35,9 @@ class Critic(nn.Module):
         self.linear7 = nn.Linear(512, 300)
         self.linear8 = nn.Linear(300, 1)
 
-        #initialization
-        self.init_w=3e-3
-        self.init_weights(self.init_w)
+        # #initialization
+        # self.init_w=3e-3
+        # self.init_weights(self.init_w)
 
     def init_weights(self, init_w): #2021/1/11
         self.linear1.weight.data = fanin_init(self.linear1.weight.data.size())
@@ -87,9 +87,9 @@ class Actor(nn.Module):
         self.linear2 = nn.Linear(512, 128)
         self.linear3 = nn.Linear(128, self.action_dim)
 
-        #initialization
-        self.init_w=1e-3
-        self.init_weights(self.init_w)
+        # #initialization
+        # self.init_w=1e-3
+        # self.init_weights(self.init_w)
 
     def init_weights(self, init_w): #2021/1/11
         self.linear1.weight.data = fanin_init(self.linear1.weight.data.size())
@@ -111,6 +111,7 @@ class TD3Agent:
                     policy_freq, policy_noise, noise_clip):
         self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         print(self.device)
+        q_loss.backward()
         self.env = env
         self.obs_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[0]
@@ -194,14 +195,15 @@ class TD3Agent:
         curr_Q1, curr_Q2 = self.critic.forward(state_batch, action_batch)
         # update critic
         q_loss = F.mse_loss(curr_Q1, expected_Q.detach()) + F.mse_loss(curr_Q2, expected_Q.detach())
+        self.critic_loss_for_log = q_loss.detach()
 
         self.critic_optimizer.zero_grad()
-        q_loss.backward()
         self.critic_optimizer.step()
 
         # update actor (deleyed)
         if self.total_it % self.policy_freq == 0:
             policy_loss = -self.critic.Q1(state_batch, self.actor.forward(state_batch)).mean()
+            self.actor_loss_for_log = policy_loss.detach()
 
             self.actor_optimizer.zero_grad()
             policy_loss.backward()

@@ -78,7 +78,7 @@ class DDQNAgent:
         self.td_error_memory = TDerrorMemory(buffer_maxlen)
     
     def get_action(self, state, episode=0):
-        epsilon = 0.5 *( 1/(0.1*episode + 1) )
+        epsilon = 0.5 *( 1/(episode + 1) )
         state = torch.FloatTensor(state.flatten()).unsqueeze(0).to(self.device)
         self.q_net.eval()
         with torch.no_grad():

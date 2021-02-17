@@ -198,20 +198,7 @@ class SatelliteContinuousEnv(gym.Env):
         #------------------------------------------------------------------------------------------------------------
 
         # 状態量（姿勢角４・姿勢角微分４・角速度３・推定慣性モーメントの対角成分 ３）
-        high = np.array([
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max,
-            np.finfo(np.float32).max],dtype=np.float32)
+        high = np.ones(14,dtype = np.float32)*np.finfo(np.float32).max
 
         self.action_space = spaces.Box(lower_bound, upper_bound)
         self.observation_space = spaces.Box(-high, high)
@@ -318,8 +305,9 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.uniform(1, high=5)
+        self.multi = np.random.randint(100,1000)/100
         self.tg_inertia = self.inertia*self.multi
+        self.est_th = np.diag(self.inertia)
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
@@ -329,7 +317,8 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        self.startOmega =  np.deg2rad(np.array([5,-5,5]) + np.random.uniform(-1, 1, size=3))
+        coef = 2*np.random.randint(0,2,size=3)-1
+        self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)
         # self.goalEuler = np.deg2rad(np.array([0,0,0])) + 0.2*np.random.uniform(-np.pi, high=np.pi, size=3)
@@ -353,7 +342,7 @@ class SatelliteContinuousEnv(gym.Env):
         #エラークオータニオンの微分
         self.d_errorQuate = self.quaternion_differential(self.startOmega, self.errorQuate)
         self.pre_state = np.hstack((self.startQuate,self.startOmega))
-        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega))
+        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega,self.est_th))
 
         obs = self.state
         # タイムスタンプをリセット
