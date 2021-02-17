@@ -13,7 +13,7 @@ from utils import *
 import wandb
 
 
-def train(wandb_on = False):
+def train(wandb_on = True):
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
 
