@@ -269,7 +269,7 @@ class SatelliteContinuousEnv(gym.Env):
         if omega@omega < 1e-5:
             self.omega_count += 1
         if self.omega_count > 5:
-            done_4 = True
+            done_3 = True
             self.omega_count = 0
         done = bool(done_1 or done_2 or done_3)
 
