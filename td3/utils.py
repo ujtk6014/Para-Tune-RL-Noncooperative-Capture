@@ -105,7 +105,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                                 "critic_loss": agent.critic_loss_for_log,
                                 "actor_loss": agent.actor_loss_for_log})
 
-                    print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
+                    print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+ "steps:" + str(step) + "\n")
                     break
                 state = next_error_state
 
