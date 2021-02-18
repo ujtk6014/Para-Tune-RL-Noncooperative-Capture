@@ -87,11 +87,11 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                 th_e += env.dt*dth
                 env.est_th = [th_e[0],th_e[4],th_e[8]]/(env.max_multi*np.diag(env.inertia))
                 #---------------------------------------------------------------------
-                next_error_state, _, done, next_state, _ = env.step(input)
-                if done:
-                    reward = -1/500*step + 1#1/np.sqrt(2*np.pi*500**2)*np.exp(-steps**2/(2*500**2))
-                else:
-                    reward = 0
+                next_error_state, reward, done, next_state, _ = env.step(input)
+                # if done:
+                #     reward = -1/500*step + 1#1/np.sqrt(2*np.pi*500**2)*np.exp(-steps**2/(2*500**2))
+                # else:
+                #     reward = 0
                 agent.replay_buffer.push(state, action, reward, next_error_state, done)
                 episode_reward += reward
 
