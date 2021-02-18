@@ -103,7 +103,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                     episode_rewards.append(episode_reward)
                     wandb.log({ "episode reward": episode_reward,
                                 "critic_loss": agent.critic_loss_for_log,
-                                "actor_loss": agent.actor_loss_for_log})
+                                "actor_loss": agent.actor_loss_for_log,
+                                "target_multi": env.multi,
+                                "number of steps": step})
 
                     print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+ " steps:" + str(step) +  " target_multi:" + str(env.multi) + "\n")
                     break
