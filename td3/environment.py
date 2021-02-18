@@ -130,8 +130,8 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-
-        self.multi = np.random.randint(100,1000)/100
+        self.max_multi = 5
+        self.multi = np.random.randint(100,self.max_multi*100)/100
         self.est_th = np.diag(self.inertia)
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
@@ -142,6 +142,7 @@ class SatelliteContinuousEnv(gym.Env):
         #シミュレーションパラメータ　
         self.dt = 0.1 
         self.simutime =50
+        self.omega_count = 0
         
         #報酬パラメータ
         self.q_weight =  1
@@ -189,10 +190,11 @@ class SatelliteContinuousEnv(gym.Env):
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5
         self.angle_thre = 0.999962
+        self.max_torque = 1
 
-        self.max_action = 0.5
-        self.lower_action = 1e-5
-        upper_bound = np.array([1, self.max_action, self.max_action,self.max_action],dtype=np.float32)
+        self.max_action = 1
+        self.lower_action = -1
+        upper_bound = np.array([self.max_action, self.max_action, self.max_action,self.max_action],dtype=np.float32)
         # upper_bound = np.array([np.finfo(np.float32).max, np.finfo(np.float32).max, np.finfo(np.float32).max, np.finfo(np.float32).max],dtype=np.float32)
         lower_bound = np.array([self.lower_action, self.lower_action, self.lower_action,self.lower_action],dtype=np.float32)
         #------------------------------------------------------------------------------------------------------------
@@ -259,11 +261,17 @@ class SatelliteContinuousEnv(gym.Env):
         done_1 = abs(omega[0]) > self.maxOmega \
                 or abs(omega[1]) > self.maxOmega \
                 or abs(omega[2]) > self.maxOmega \
-                or abs(action[0]) > self.max_action \
-                or abs(action[1]) > self.max_action \
-                or abs(action[2]) > self.max_action 
+                or abs(action[0]) > self.max_torque \
+                or abs(action[1]) > self.max_torque \
+                or abs(action[2]) > self.max_torque 
         done_2 = self.nsteps >= self.max_steps
-        done = bool(done_1 or done_2)
+        done_3 = False
+        if omega@omega < 1e-5:
+            self.omega_count += 1
+        if self.omega_count > 5:
+            done_4 = True
+            self.omega_count = 0
+        done = bool(done_1 or done_2 or done_3)
 
         # 報酬関数
         #--------REWARD---------
@@ -305,7 +313,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,1000)/100
+        self.multi = np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = np.diag(self.inertia)
         self.inertia_comb = self.inertia + self.tg_inertia

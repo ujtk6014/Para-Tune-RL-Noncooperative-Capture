@@ -99,9 +99,9 @@ class Actor(nn.Module):
     def forward(self, obs):
         x = F.relu(self.linear1(obs))
         x = F.relu(self.linear2(x))
-        # output of tanh is bounded between 0 and 1
+        # output of tanh is bounded between -1 and 1
         # multiply by maximum action (here: 10N) in order to scale the action appropriately
-        x = torch.sigmoid(self.linear3(x))
+        x = torch.tanh(self.linear3(x))
 
         return x
 
@@ -111,7 +111,6 @@ class TD3Agent:
                     policy_freq, policy_noise, noise_clip):
         self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         print(self.device)
-        q_loss.backward()
         self.env = env
         self.obs_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[0]

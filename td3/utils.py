@@ -51,6 +51,8 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
     episode_rewards = []
     counter = 0
+    k_max = 10
+    d_grad = 2500
     try:
         # with tqdm(range(max_episodes),leave=False) as pbar:
         #     for episode, ch in enumerate(pbar):
@@ -63,23 +65,16 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
 
             for step in range(max_steps):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
-                if step % 20 == 0:
-                    action = agent.get_action(state, (episode + 1) * (step + 1))
+                action = agent.get_action(state, (episode + 1) * (step + 1))
+                action = (action + 1)/2
                 #----------------control law (Adaptive controller)-----------------------
                 # alpha = action[0]
                 # k = action[1]
-                k = action[0]
-                D = np.diag([action[1],1,1,1,action[2],1,1,1,action[3]])
-                # D = np.diag([10e-4*action[0]+e,action[1]+e,action[1]+e,action[1]+e,10e-4*action[2]+e,action[1]+e,action[1]+e,action[1]+e,10e-4*action[3]+e])
-                # D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
-                # action[0] = alpha
-                # action[1] = k
-                # action[2] = D[0,0]
-                # action[3] = D[1,1]
-                # action[4] = D[4,4]
-                # action[5] = D[8,8]
+                k = action[0]*k_max
+                d_tmp = [action[i+1]*2500 +500 for i in range(len(action)-1)]
+                D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
                 
-                W = state[-3:]
+                W = state[8:11]
                 x1 = state[1:4]
                 x2 = alpha*x1 + W
                 dqe = state[4:8]
@@ -90,9 +85,13 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
 
                 dth = np.linalg.inv(D) @ Y.T @ x2
                 th_e += env.dt*dth
-                env.est_th = [th_e[0],th_e[4],th_e[8]]
+                env.est_th = [th_e[0],th_e[4],th_e[8]]/(env.max_multi*np.diag(env.inertia))
                 #---------------------------------------------------------------------
-                next_error_state, reward, done, next_state, _ = env.step(input)
+                next_error_state, _, done, next_state, _ = env.step(input)
+                if done:
+                    reward = -5/500*steps + 5#1/np.sqrt(2*np.pi*500**2)*np.exp(-steps**2/(2*500**2))
+                else:
+                    reward = 0
                 agent.replay_buffer.push(state, action, reward, next_error_state, done)
                 episode_reward += reward
 
