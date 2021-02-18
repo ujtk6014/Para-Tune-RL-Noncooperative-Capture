@@ -145,9 +145,9 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1
-        self.w_weight = 1
-        self.action_weight = 1
+        self.q_weight =  1*20
+        self.w_weight = 1.5*100
+        self.action_weight = 0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -278,25 +278,25 @@ class SatelliteContinuousEnv(gym.Env):
         if not done:
             # reward += -0.01
             #状態と入力を抑えたい
-            # reward = -(self.q_weight*((1-qe_new[0])**2 + qe[1:]@qe[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-            if qe_new[0] >= self.angle_thre:
-                reward = np.array([1,-1,-1,-1])@np.power(qe,2)
-            else:
-                if qe_new[0] > qe[0]:
-                    reward = 0.1
-                else:
-                    reward = -0.1
+            reward = -(self.q_weight*((1-qe_new[0])**2 + qe[1:]@qe[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
+            # if qe_new[0] >= self.angle_thre:
+            #     reward = np.array([1,-1,-1,-1])@np.power(qe,2)
+            # else:
+            #     if qe_new[0] > qe[0]:
+            #         reward = 0.1
+            #     else:
+            #         reward = -0.1
         
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
-            if bool(done_1):
-                reward = -30
-            else:
-                if qe_new[0] >= self.angle_thre:
-                    reward = 30
-                else:
-                    reward = 0
+            # if bool(done_1):
+            #     reward = -30
+            # else:
+            #     if qe_new[0] >= self.angle_thre:
+            #         reward = 30
+            #     else:
+            reward = 0
         #------------------------
 
         else:
