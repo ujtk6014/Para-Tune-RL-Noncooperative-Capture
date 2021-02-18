@@ -107,7 +107,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                                 "target_multi": env.multi,
                                 "number of steps": step})
 
-                    print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+ " steps:" + str(step) +  " target_multi:" + str(env.multi) + "\n")
+                    print("\nEpisode " + str(episode) + " total reward:" + str(episode_reward)+ " steps:" + str(step) +  " target_multi:" + str(env.multi) + "\n")
                     break
                 state = next_error_state
 
