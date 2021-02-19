@@ -315,7 +315,7 @@ class SatelliteContinuousEnv(gym.Env):
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
         self.est_th = np.diag(self.inertia)/(10*np.diag(self.inertia))
-        self.multi = 3#np.random.randint(100,1000)/100
+        self.multi = np.random.randint(100,1000)/100
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
