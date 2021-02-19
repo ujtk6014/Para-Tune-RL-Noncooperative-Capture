@@ -140,9 +140,9 @@ class SatelliteContinuousEnv(gym.Env):
         self.simutime =50
         
         #報酬パラメータ
-        self.q_weight =  1*20
-        self.w_weight = 1.5*100
-        self.action_weight = 0.25*10
+        self.q_weight = 1# 1*20
+        self.w_weight = 1 #1.5*100
+        self.action_weight = 1 #0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -184,7 +184,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.soft_angle_thre = 0
         self.omega_thre = 1.5e-5
         self.max_action = 1
-        self.time_window = 2
+        self.time_window = 10
         self.omega_count = 5
         #------------------------------------------------------------------------------------------------------------
         # 状態量（姿勢角４・角速度３・推定パラメータ３）
