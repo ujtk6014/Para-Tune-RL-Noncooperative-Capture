@@ -71,7 +71,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
             d_tmp = 2500/9*env.multi + 2500/9-500
             d_tmp = [d_tmp,d_tmp,d_tmp]
             D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
-            delta = [1,1000,1000,1000]
+            delta = [1,500,500,500]
             for step in range(int(max_steps/time_window)):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
                 action = agent.get_action(state_hist, episode)
@@ -92,7 +92,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                 for i in range(len(para)):
                     para[i] += delta[i]*sign[i]
                 para[0] = np.clip(para[0],1,10)
-                para[1:] = [np.clip(para[i+1],100,3000) for i in range(len(para)-1)]
+                para[1:] = [np.clip(para[i+1],500,5000) for i in range(len(para)-1)]
                 k = para[0]
                 D[0,0] = 1/para[1]
                 D[4,4] = 1/para[2]
