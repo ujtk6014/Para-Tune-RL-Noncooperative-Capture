@@ -22,7 +22,7 @@ def train(wandb_on = True):
         wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
             config={
             "State": 'angle:4, ang_vel:3 * time_window',
-            "batch_size": 128,
+            "batch_size": 32,
             "learning_rate": 1e-4,
             "max_episodes": 10000,
             "max_steps": 500,
