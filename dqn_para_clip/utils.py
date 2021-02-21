@@ -92,7 +92,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                 para = [k,1/D[0,0],1/D[4,4],1/D[8,8]]
                 for i in range(len(para)):
                     para[i] += delta[i]*sign[i]
-                para[0] = np.clip(para[0],1,10)
+                para[0] = np.clip(para[0],1,8)
                 para[1:] = [np.clip(para[i+1],500,5000) for i in range(len(para)-1)]
                 k = para[0]
                 D[0,0] = 1/para[1]

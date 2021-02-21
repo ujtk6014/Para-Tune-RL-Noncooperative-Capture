@@ -28,8 +28,8 @@ def train(wandb_on = True):
             "max_steps": 500,
             "gamma": 0.99,
             "tau": 1e-2,
-            "buffer_maxlen": 100000,
-            "prioritized_on": False,}
+            "buffer_maxlen": 50000,
+            "prioritized_on": True,}
         )
         config = wandb.config
         max_episodes = config.max_episodes
