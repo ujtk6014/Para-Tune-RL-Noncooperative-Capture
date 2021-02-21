@@ -349,7 +349,7 @@ class SatelliteContinuousEnv(gym.Env):
         #エラークオータニオンの微分
         self.d_errorQuate = self.quaternion_differential(self.startOmega, self.errorQuate)
         self.pre_state = np.hstack((self.startQuate,self.startOmega))
-        self.state = np.hstack((self.errorQuate,self.startOmega))
+        self.state = np.hstack((self.errorQuate,self.startOmega,self.est_th))
 
         obs = self.state
         # タイムスタンプをリセット

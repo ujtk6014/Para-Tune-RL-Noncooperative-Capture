@@ -102,6 +102,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                 if k<0 or D[0,0]<0 or D[4,4]<0 or D[8,8] <0:
                     env.neg_param_flag = False
                 
+                obs_before = obs
                 for simu in range(time_window):
                     W = obs[4:7]
                     x1 = obs[1:4]
@@ -117,20 +118,25 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     env.est_th = [th_e[0],th_e[4],th_e[8]]/(10*np.diag(env.inertia))
                     #---------------------------------------------------------------------
                     next_error_state, reward, done, next_state, _ = env.step(input)
-                    obs = next_error_state
+                    if simu < time_window-1: 
+                        obs = next_error_state
+                    else:
+                        obs_after = next_error_state
+
                     window_reward += reward 
                     # next_state_hist[state_num:] = next_state_hist[:-state_num]
                     # next_state_hist[:state_num] = next_error_state
                     # omega_error[1:] = omega_error[:-1]
                     # omega_error[0] = 1-next_error_state[0]
-                
-                reward = window_reward
-                
-                agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
+
+                # agent.replay_buffer.push(state_hist, action, reward, next_state_hist, done)
+                agent.replay_buffer.push(obs_before, action, window_reward, obs_after, done)
                 if prioritized_on:                            
-                    td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
+                    td_error = agent.get_td_error(obs_before, action, obs_after, window_reward)
+                    # td_error = agent.get_td_error(state_hist, action, next_state_hist, reward)
                     agent.td_error_memory.push(td_error)
-                episode_reward += reward
+
+                episode_reward += window_reward
 
                 # update the agent if enough transitions are stored in replay buffer
                 if len(agent.replay_buffer) > batch_size:
@@ -140,15 +146,17 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, t
                     episode_rewards.append(episode_reward)
                     if wandb_on:
                         wandb.log({ "episode reward": episode_reward,
-                                    "loss": agent.loss_for_log})
+                                    "loss": agent.loss_for_log,
+                                    "target_multi": env.multi})
                     if prioritized_on:
                         agent.update_td_error_memory()
-                    print("\nEpisode " + str(episode) + " total reward : " + str(episode_reward)+"\n")
+                    print("\nEpisode " + str(episode) + " total reward:" + str(episode_reward)+ " steps:" + str(step) +  " target_multi:" + str(env.multi) + "\n")
                     break
                 
                 # #状態量の更新
                 # obs = next_error_state
                 # state_hist = next_state_hist
+                obs = obs_after
                 window_reward = 0
 
     except KeyboardInterrupt:
