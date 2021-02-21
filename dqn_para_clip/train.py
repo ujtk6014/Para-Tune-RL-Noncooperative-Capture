@@ -22,7 +22,7 @@ def train(wandb_on = True):
         wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
             config={
             "State": 'angle:4, ang_vel:3 * time_window',
-            "batch_size": 32,
+            "batch_size": 128,
             "learning_rate": 1e-4,
             "max_episodes": 10000,
             "max_steps": 500,
@@ -55,8 +55,8 @@ def train(wandb_on = True):
     time_window = env.time_window
 
     agent = DDQNAgent(env, gamma, tau, buffer_maxlen, learning_rate, True, max_episodes * max_steps, prioritized_on)
-    if wandb_on:
-        wandb.watch([agent.q_net,agent.q_net_target], log="all")
+    # if wandb_on:
+        # wandb.watch([agent.q_net,agent.q_net_target], log="all")
     #学習済みモデルを使うとき
     #curr_dir = os.path.abspath(os.getcwd())
     #agent = torch.load(curr_dir + "/models/spacecraft_control_ddqn_hist.pkl")
