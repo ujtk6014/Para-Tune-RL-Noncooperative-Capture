@@ -130,7 +130,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.max_multi = 3
+        self.max_multi = 10
         self.multi = np.random.randint(100,self.max_multi*100)/100
         self.est_th = np.diag(self.inertia)
         self.tg_inertia = self.inertia*self.multi
@@ -145,9 +145,9 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1*20
-        self.w_weight = 1.5*100
-        self.action_weight = 0.25*10
+        self.q_weight =  1#1*20
+        self.w_weight = 1#1.5*100
+        self.action_weight = 1#0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -313,7 +313,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = 3#np.random.randint(100,self.max_multi*100)/100
+        self.multi = np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = np.diag(self.inertia)/(self.max_multi*np.diag(self.inertia))
         self.inertia_comb = self.inertia + self.tg_inertia
