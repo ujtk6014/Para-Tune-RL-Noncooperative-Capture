@@ -66,12 +66,12 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
             for step in range(max_steps):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
                 action = agent.get_action(state, (episode + 1) * (step + 1))
-                action = (action + 1)/2
+                para_candi = (action + 1)/2
                 #----------------control law (Adaptive controller)-----------------------
                 # alpha = action[0]
                 # k = action[1]
-                k = action[0]*k_max
-                d_tmp = [action[i+1]*2500 +500 for i in range(len(action)-1)]
+                k = para_candi[0]*k_max
+                d_tmp = [para_candi[i+1]*2500 +500 for i in range(len(para_candi)-1)]
                 D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
                 
                 W = state[8:11]

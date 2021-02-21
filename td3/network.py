@@ -43,12 +43,12 @@ class Critic(nn.Module):
         self.linear1.weight.data = fanin_init(self.linear1.weight.data.size())
         self.linear2.weight.data = fanin_init(self.linear2.weight.data.size())
         self.linear3.weight.data = fanin_init(self.linear3.weight.data.size())
-        self.linear4.weight.data.uniform_(-self.init_w, self.init_w)
+        # self.linear4.weight.data.uniform_(-self.init_w, self.init_w)
 
         self.linear5.weight.data = fanin_init(self.linear5.weight.data.size())
         self.linear6.weight.data = fanin_init(self.linear6.weight.data.size())
         self.linear7.weight.data = fanin_init(self.linear7.weight.data.size())
-        self.linear8.weight.data.uniform_(-self.init_w, self.init_w)
+        # self.linear8.weight.data.uniform_(-self.init_w, self.init_w)
 
     def forward(self, x, a):
         x = torch.cat([x,a], 1)
