@@ -18,7 +18,7 @@ def train():
     env = make("SatelliteContinuous")
 
     #logger
-    wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
+    wandb.init(project='Para-Tune-RL-dqn-hist',
         config={
         "State": 'angle:4, ang_vel:3 * time_window',
         "batch_size": 256,

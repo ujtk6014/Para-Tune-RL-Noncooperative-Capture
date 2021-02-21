@@ -19,7 +19,7 @@ def train(wandb_on = True):
 
     if wandb_on:
         #logger
-        wandb.init(project='Para-Tune-RL-Noncooperative-Capture',
+        wandb.init(project='Para-Tune-RL-dqn_para_clip',
             config={
             "State": 'angle:4, ang_vel:3 * time_window',
             "batch_size": 128,
