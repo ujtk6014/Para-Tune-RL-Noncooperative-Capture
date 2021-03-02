@@ -194,9 +194,11 @@ class SatelliteContinuousEnv(gym.Env):
 
         self.max_action = 1
         self.lower_action = -1
-        upper_bound = np.array([self.max_action, self.max_action, self.max_action,self.max_action],dtype=np.float32)
+        upper_bound = self.max_action*np.ones(11,dtype=np.float32)
+        # upper_bound = np.array([self.max_action, self.max_action, self.max_action,self.max_action],dtype=np.float32)
         # upper_bound = np.array([np.finfo(np.float32).max, np.finfo(np.float32).max, np.finfo(np.float32).max, np.finfo(np.float32).max],dtype=np.float32)
-        lower_bound = np.array([self.lower_action, self.lower_action, self.lower_action,self.lower_action],dtype=np.float32)
+        # lower_bound = np.array([self.lower_action, self.lower_action, self.lower_action,self.lower_action],dtype=np.float32)
+        lower_bound = -self.max_action*np.ones(11,dtype=np.float32)
         #------------------------------------------------------------------------------------------------------------
 
         # 状態量（姿勢角４・姿勢角微分４・角速度３・推定慣性モーメントの対角成分 ３）
@@ -313,7 +315,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,self.max_multi*100)/100
+        self.multi = 3#np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = np.diag(self.inertia)/(self.max_multi*np.diag(self.inertia))
         self.inertia_comb = self.inertia + self.tg_inertia
@@ -325,7 +327,7 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        coef = 2*np.random.randint(0,2,size=3)-1
+        coef = 1#2*np.random.randint(0,2,size=3)-1
         self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)

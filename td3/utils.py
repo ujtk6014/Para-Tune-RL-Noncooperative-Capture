@@ -51,7 +51,8 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
     episode_rewards = []
     counter = 0
-    k_max = 10
+    k_max = 5
+    alpha_max = 1
     d_grad = 2500
     try:
         # with tqdm(range(max_episodes),leave=False) as pbar:
@@ -61,7 +62,6 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
             state = env.reset()
             episode_reward = 0    
             th_e = np.array(env.inertia.flatten())
-            alpha = 0.5
 
             for step in range(max_steps):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
@@ -71,8 +71,9 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                 # alpha = action[0]
                 # k = action[1]
                 k = para_candi[0]*k_max
-                d_tmp = [para_candi[i+1]*2500 +500 for i in range(len(para_candi)-1)]
-                D = np.diag([1/d_tmp[0],1,1,1,1/d_tmp[1],1,1,1,1/d_tmp[2]])
+                alpha = para_candi[1]*alpha_max
+                d_tmp = [para_candi[i+2]*2500 +500 for i in range(len(para_candi)-2)]
+                D = np.diag([1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
                 
                 W = state[8:11]
                 x1 = state[1:4]
