@@ -50,7 +50,7 @@ def train():
 
     agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps,
                     policy_freq, policy_noise, noise_clip)
-    wandb.watch([agent.critic,agent.actor], log="all")
+    # wandb.watch([agent.critic,agent.actor], log="all")
     #学習済みモデルを使うとき
     # curr_dir = os.path.abspath(os.getcwd())
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
@@ -79,7 +79,7 @@ def train():
 
     if not os.path.isdir("models"):
         os.mkdir("models")
-    # torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
+    torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
 
 
 def evaluate():
