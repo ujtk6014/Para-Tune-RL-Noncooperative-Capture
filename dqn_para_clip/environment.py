@@ -316,7 +316,7 @@ class SatelliteContinuousEnv(gym.Env):
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
         self.est_th = np.diag(self.inertia)/(10*np.diag(self.inertia))
-        self.multi = np.random.randint(100,1000)/100
+        self.multi = 3#np.random.randint(100,1000)/100
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
@@ -327,7 +327,7 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        coef = 2*np.random.randint(0,2,size=3)-1
+        coef = 1#2*np.random.randint(0,2,size=3)-1
         self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)
