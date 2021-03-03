@@ -90,7 +90,9 @@ def evaluate():
 
     curr_dir = os.path.abspath(os.getcwd())
 
-    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
+    # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
+    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl",map_location='cpu')
+    agent.device = torch.device('cpu')
     agent.train = False
 
     state = env.reset()
@@ -101,7 +103,9 @@ def evaluate():
     q = np.empty((0,4))
     w = np.empty((0,3))
     actions = np.empty((0,3))
-    param = np.empty((0,4))
+    k_hist = []
+    alpha_hist = []
+    d_hist = np.empty((0,9))
 
     dt = 0.1
     simutime = 50
@@ -118,10 +122,10 @@ def evaluate():
             action = agent.get_action(state )
             para_candi = (action + 1)/2
             #----------------control law (Adaptive controller)-----------------------
-            k = 2.5#para_candi[0]*k_max
-            alpha = 0.8#para_candi[1]*alpha_max
+            k = para_candi[0]*k_max
+            alpha = para_candi[1]*alpha_max
             d_tmp = [para_candi[i+2]*2500 +500 for i in range(len(para_candi)-2)]
-            D = np.diag([4e-4,1,1,1,5e-4,1,1,1,5.2e-4])#[1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
+            D = np.diag([1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
 
             W = state[8:11]
             x1 = state[1:4]
@@ -147,7 +151,9 @@ def evaluate():
             w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
             r += reward
             actions = np.append(actions, input.reshape(1,-1),axis=0)
-            # param = np.append(param, action.reshape(1,-1),axis=0)
+            k_hist.append(k)
+            alpha_hist.append(alpha)
+            d_hist = np.append(d_hist, np.array(d_tmp).reshape(1,-1),axis=0)
             state = next_error_state
 
     env.close()
@@ -249,28 +255,43 @@ def evaluate():
     # plt.savefig(curr_dir + "/results/td3_eval/plot_angle.png")
 
     # # plt.figure(figsize=(yoko,tate),dpi=100)
-    # plt.subplot(234)
-    # plt.plot(np.arange(max_steps)*dt, param[:,0],label = r"$\gain$")
-    # plt.ylabel('k gain')
-    # plt.xlabel(r'time [s]')
-    # plt.tight_layout()
-    # # plt.ylim(-20, 20)
-    # plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    # # plt.savefig(curr_dir + "/results/td3_eval/plot_k.png")
+    plt.subplot(234)
+    plt.plot(np.arange(max_steps)*dt, k_hist,label = r"$\gain$")
+    plt.ylabel('k gain')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_k.png")
 
-    # # # plt.figure(figsize=(yoko,tate),dpi=100)
-    # plt.subplot(235)
-    # plt.plot(np.arange(max_steps)*dt, parm[:,1],label = r"$D_{1}$")
-    # plt.plot(np.arange(max_steps)*dt, param[:,2],label = r"$D_{2}$")
-    # plt.plot(np.arange(max_steps)*dt, param[:,3],label = r"$D_{3}$")
-    # # plt.title('Action')
-    # plt.ylabel('d [deg]')
-    # plt.xlabel(r'time [s]')
-    # plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
-    # plt.tight_layout()
-    # # plt.ylim(-20, 20)
-    # plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    # # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
+    plt.subplot(235)
+    plt.plot(np.arange(max_steps)*dt, alpha_hist,label = r"$alpha$")
+    plt.ylabel(r'$\alpha$')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_k.png")
+
+    # # plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.subplot(236)
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,0],label = r"$D_{1}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,1],label = r"$D_{2}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,2],label = r"$D_{3}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,3],label = r"$D_{4}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,4],label = r"$D_{5}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,5],label = r"$D_{6}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,6],label = r"$D_{7}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,7],label = r"$D_{8}$")
+    plt.plot(np.arange(max_steps)*dt, d_hist[:,8],label = r"$D_{9}$")
+    # plt.title('Action')
+    plt.ylabel('d')
+    plt.xlabel(r'time [s]')
+    plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
+    plt.tight_layout()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
     plt.savefig(curr_dir + "/results/td3_eval/results.png")
     plt.show()
     # -------------------------結果プロット終わり--------------------------------
@@ -434,7 +455,7 @@ def env_adaptive():
 
     #----------------------control parameters----------------------------
     alpha = 0.5
-    k = 0.8
+    k = 2
     zeta = 0.2
     D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
     th = env.inertia_comb.flatten()
@@ -443,8 +464,8 @@ def env_adaptive():
     action = np.array([0,0,0]).reshape(1,3)
     actions = np.append(actions, action,axis=0)
 
-    dt = 0.01
-    simulation_iterations = int(30/0.01) -1 # dt is 0.01
+    dt = 0.1
+    simulation_iterations = int(50/0.1) -1 # dt is 0.01
 
     for i in range(1, simulation_iterations):
         action = np.squeeze(action)
@@ -461,7 +482,7 @@ def env_adaptive():
         w=np.append(w,next_error_state[-3:].reshape(1,-1),axis=0)
         r += reward
     #----------------control law (Adaptive controller)-----------------------
-        W = next_error_state[-3:]
+        W = next_error_state[8:11]
         x1 = next_error_state[1:4]
         x2 = alpha*x1 + W
         dqe = next_error_state[4:8]
