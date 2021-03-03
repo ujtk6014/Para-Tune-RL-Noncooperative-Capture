@@ -103,22 +103,27 @@ def evaluate():
     actions = np.empty((0,3))
     param = np.empty((0,4))
 
-    dt = 0.01
-    simutime = 30
-    env.simutime = simutime
+    dt = 0.1
+    simutime = 50
+    # env.simutime = simutime
         
-    max_steps = int(simutime/dt) -1 # dt is 0.01
+    max_steps = int(simutime/dt) -1 # dt is 0.1
     alpha = 0.5
+    k_max = 5
+    alpha_max = 1
 
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
         for i, ch in enumerate(pbar):
-            # if i==1 or i%100 ==0:
-            action = agent.get_action(state)
-            k = action[0]
-            D = np.diag([action[1],1,1,1,action[2],1,1,1,action[3]])
-            
-            W = state[-3:]
+            action = agent.get_action(state )
+            para_candi = (action + 1)/2
+            #----------------control law (Adaptive controller)-----------------------
+            k = 2.5#para_candi[0]*k_max
+            alpha = 0.8#para_candi[1]*alpha_max
+            d_tmp = [para_candi[i+2]*2500 +500 for i in range(len(para_candi)-2)]
+            D = np.diag([4e-4,1,1,1,5e-4,1,1,1,5.2e-4])#[1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
+
+            W = state[8:11]
             x1 = state[1:4]
             x2 = alpha*x1 + W
             dqe = state[4:8]
@@ -129,6 +134,7 @@ def evaluate():
 
             dth = np.linalg.inv(D) @ Y.T @ x2
             th_e += env.dt*dth
+            env.est_th = [th_e[0],th_e[4],th_e[8]]/(env.max_multi*np.diag(env.inertia))
             next_error_state, reward, done, next_state, _ = env.step(input)
             # if i == 20/dt:
             #     env.inertia = env.inertia_comb
@@ -138,10 +144,10 @@ def evaluate():
             # env.render()        
             q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
             qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
-            w=np.append(w,next_error_state[-3:].reshape(1,-1),axis=0)
+            w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
             r += reward
             actions = np.append(actions, input.reshape(1,-1),axis=0)
-            param = np.append(param, action.reshape(1,-1),axis=0)
+            # param = np.append(param, action.reshape(1,-1),axis=0)
             state = next_error_state
 
     env.close()
@@ -242,29 +248,29 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/td3_eval/plot_angle.png")
 
-    # plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.subplot(234)
-    plt.plot(np.arange(max_steps)*dt, param[:,0],label = r"$\gain$")
-    plt.ylabel('k gain')
-    plt.xlabel(r'time [s]')
-    plt.tight_layout()
-    # plt.ylim(-20, 20)
-    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    # plt.savefig(curr_dir + "/results/td3_eval/plot_k.png")
+    # # plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.subplot(234)
+    # plt.plot(np.arange(max_steps)*dt, param[:,0],label = r"$\gain$")
+    # plt.ylabel('k gain')
+    # plt.xlabel(r'time [s]')
+    # plt.tight_layout()
+    # # plt.ylim(-20, 20)
+    # plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # # plt.savefig(curr_dir + "/results/td3_eval/plot_k.png")
 
-    # plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.subplot(235)
-    plt.plot(np.arange(max_steps)*dt, parm[:,1],label = r"$D_{1}$")
-    plt.plot(np.arange(max_steps)*dt, param[:,2],label = r"$D_{2}$")
-    plt.plot(np.arange(max_steps)*dt, param[:,3],label = r"$D_{3}$")
-    # plt.title('Action')
-    plt.ylabel('d [deg]')
-    plt.xlabel(r'time [s]')
-    plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
-    plt.tight_layout()
-    # plt.ylim(-20, 20)
-    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
+    # # # plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.subplot(235)
+    # plt.plot(np.arange(max_steps)*dt, parm[:,1],label = r"$D_{1}$")
+    # plt.plot(np.arange(max_steps)*dt, param[:,2],label = r"$D_{2}$")
+    # plt.plot(np.arange(max_steps)*dt, param[:,3],label = r"$D_{3}$")
+    # # plt.title('Action')
+    # plt.ylabel('d [deg]')
+    # plt.xlabel(r'time [s]')
+    # plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=3)
+    # plt.tight_layout()
+    # # plt.ylim(-20, 20)
+    # plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
     plt.savefig(curr_dir + "/results/td3_eval/results.png")
     plt.show()
     # -------------------------結果プロット終わり--------------------------------
