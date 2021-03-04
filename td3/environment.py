@@ -145,9 +145,9 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1*8#1*20
+        self.q_weight =  1*5#1*20
         self.w_weight = 1.5*10#1.5*100
-        self.action_weight = 0.25*1#0.25*10
+        self.action_weight = 0.25#0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -190,7 +190,7 @@ class SatelliteContinuousEnv(gym.Env):
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5
         self.angle_thre = 0.999962
-        self.max_torque = 0.6
+        self.max_torque = 1
 
         self.max_action = 1
         self.lower_action = -1
@@ -279,7 +279,7 @@ class SatelliteContinuousEnv(gym.Env):
         #--------REWARD---------
         if not done:
             if max(abs(action)) > self.max_torque:
-                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 5*action@action) 
+                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 3*action@action) 
             else:
                 #状態と入力を抑えたい
                 reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
@@ -287,13 +287,13 @@ class SatelliteContinuousEnv(gym.Env):
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
-            if bool(done_1):
-                reward = -10
-            else:
+            # if bool(done_1):
+            #     reward = -10
+            # else:
             #     if qe_new[0] >= self.angle_thre:
             #         reward = 30
             #     else:
-                reward = 0
+            reward = 0
         #------------------------
 
         else:
@@ -322,7 +322,7 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        coef = 2*np.random.randint(0,2,size=3)-1
+        coef = 1#2*np.random.randint(0,2,size=3)-1
         self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)
