@@ -51,7 +51,7 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
     episode_rewards = []
     counter = 0
-    k_max = 5
+    k_max = 10
     alpha_max = 1
     d_grad = 2500
     try:
