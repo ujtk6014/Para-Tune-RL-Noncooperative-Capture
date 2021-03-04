@@ -147,7 +147,7 @@ class SatelliteContinuousEnv(gym.Env):
         #報酬パラメータ
         self.q_weight =  1*8#1*20
         self.w_weight = 1.5*10#1.5*100
-        self.action_weight = 0.25*2#0.25*10
+        self.action_weight = 0.25*1#0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -279,7 +279,7 @@ class SatelliteContinuousEnv(gym.Env):
         #--------REWARD---------
         if not done:
             if max(abs(action)) > self.max_torque:
-                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 10*action@action) 
+                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 5*action@action) 
             else:
                 #状態と入力を抑えたい
                 reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
