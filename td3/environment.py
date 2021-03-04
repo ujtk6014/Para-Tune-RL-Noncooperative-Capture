@@ -145,7 +145,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1*5#1*20
+        self.q_weight =  1*8#1*20
         self.w_weight = 1.5*10#1.5*100
         self.action_weight = 0.25*2#0.25*10
         
@@ -263,9 +263,9 @@ class SatelliteContinuousEnv(gym.Env):
         done_1 = abs(omega[0]) > self.maxOmega \
                 or abs(omega[1]) > self.maxOmega \
                 or abs(omega[2]) > self.maxOmega \
-                or abs(action[0]) > self.max_torque \
-                or abs(action[1]) > self.max_torque \
-                or abs(action[2]) > self.max_torque 
+                # or abs(action[0]) > self.max_torque \
+                # or abs(action[1]) > self.max_torque \
+                # or abs(action[2]) > self.max_torque 
         done_2 = self.nsteps >= self.max_steps
         done_3 = False
         if omega@omega < 1e-5:
@@ -278,16 +278,11 @@ class SatelliteContinuousEnv(gym.Env):
         # 報酬関数
         #--------REWARD---------
         if not done:
-            # reward += -0.01
-            #状態と入力を抑えたい
-            reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-            # if qe_new[0] >= self.angle_thre:
-            #     reward = np.array([1,-1,-1,-1])@np.power(qe,2)
-            # else:
-            #     if qe_new[0] > qe[0]:
-            #         reward = 0.1
-            #     else:
-            #         reward = -0.1
+            if max(abs(action)) > self.max_torque:
+                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 10*action@action) 
+            else:
+                #状態と入力を抑えたい
+                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
         
         elif self.steps_beyond_done is None:
             # epsiode just ended
@@ -315,7 +310,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,self.max_multi*100)/100
+        self.multi = 3 #np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = np.diag(self.inertia)/(self.max_multi*np.diag(self.inertia))
         self.inertia_comb = self.inertia + self.tg_inertia
