@@ -145,8 +145,8 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1*6*20
-        self.w_weight = 1.5*8#1.5*100
+        self.q_weight =  1*5#1*20
+        self.w_weight = 1.5*10#1.5*100
         self.action_weight = 0.25*2#0.25*10
         
         # 初期状態 角度(deg)　角速度(rad/s)
@@ -189,8 +189,8 @@ class SatelliteContinuousEnv(gym.Env):
 
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 5
-        self.angle_thre = 0.9999962
-        self.max_torque = 1
+        self.angle_thre = 0.999962
+        self.max_torque = 0.6
 
         self.max_action = 1
         self.lower_action = -1
@@ -293,12 +293,12 @@ class SatelliteContinuousEnv(gym.Env):
             # epsiode just ended
             self.steps_beyond_done = 0
             if bool(done_1):
-                reward = -30
+                reward = -10
             else:
-                if qe_new[0] >= self.angle_thre:
-                    reward = 30
-                else:
-                    reward = 0
+            #     if qe_new[0] >= self.angle_thre:
+            #         reward = 30
+            #     else:
+                reward = 0
         #------------------------
 
         else:
@@ -315,7 +315,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,self.max_multi*100)/100
+        self.multi = 3#np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = np.diag(self.inertia)/(self.max_multi*np.diag(self.inertia))
         self.inertia_comb = self.inertia + self.tg_inertia
@@ -327,7 +327,7 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        coef = 2*np.random.randint(0,2,size=3)-1
+        coef = 1#2*np.random.randint(0,2,size=3)-1
         self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)
