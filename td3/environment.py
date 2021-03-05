@@ -188,7 +188,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.max_steps = self.simutime/self.dt
 
         # Angle, angle speed and speed at which to fail the episode
-        self.maxOmega = 5
+        self.maxOmega = 0.5
         self.angle_thre = 0.999962
         self.max_torque = 1
 
@@ -263,9 +263,9 @@ class SatelliteContinuousEnv(gym.Env):
         done_1 = abs(omega[0]) > self.maxOmega \
                 or abs(omega[1]) > self.maxOmega \
                 or abs(omega[2]) > self.maxOmega \
-                or abs(action[0]) > self.max_torque \
-                or abs(action[1]) > self.max_torque \
-                or abs(action[2]) > self.max_torque 
+                # or abs(action[0]) > self.max_torque \
+                # or abs(action[1]) > self.max_torque \
+                # or abs(action[2]) > self.max_torque 
         done_2 = self.nsteps >= self.max_steps
         done_3 = False
         if 1-qe_new[0] < 1e-5:
