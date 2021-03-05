@@ -268,7 +268,7 @@ class SatelliteContinuousEnv(gym.Env):
                 or abs(action[2]) > self.max_torque 
         done_2 = self.nsteps >= self.max_steps
         done_3 = False
-        if 1-qe_new[0] < 1e-4:
+        if 1-qe_new[0] < 1e-3:
             self.omega_count += 1
         if self.omega_count > 5:
             done_3 = True
