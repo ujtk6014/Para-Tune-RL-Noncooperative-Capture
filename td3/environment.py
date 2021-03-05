@@ -145,7 +145,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1*5#1*20
+        self.q_weight =  1*8#1*20
         self.w_weight = 1.5*10#1.5*100
         self.action_weight = 0.25#0.25*10
         
@@ -263,9 +263,9 @@ class SatelliteContinuousEnv(gym.Env):
         done_1 = abs(omega[0]) > self.maxOmega \
                 or abs(omega[1]) > self.maxOmega \
                 or abs(omega[2]) > self.maxOmega \
-                # or abs(action[0]) > self.max_torque \
-                # or abs(action[1]) > self.max_torque \
-                # or abs(action[2]) > self.max_torque 
+                or abs(action[0]) > self.max_torque \
+                or abs(action[1]) > self.max_torque \
+                or abs(action[2]) > self.max_torque 
         done_2 = self.nsteps >= self.max_steps
         done_3 = False
         if omega@omega < 1e-5:
@@ -278,22 +278,22 @@ class SatelliteContinuousEnv(gym.Env):
         # 報酬関数
         #--------REWARD---------
         if not done:
-            if max(abs(action)) > self.max_torque:
-                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 3*action@action) 
-            else:
-                #状態と入力を抑えたい
-                reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-        
+            # if max(abs(action)) > self.max_torque:
+            #     reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 3*action@action) 
+            # else:
+            #状態と入力を抑えたい
+            reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
+    
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
-            # if bool(done_1):
-            #     reward = -10
-            # else:
+                if bool(done_1):
+                    reward = -1
+                else:
             #     if qe_new[0] >= self.angle_thre:
             #         reward = 30
             #     else:
-            reward = 0
+                reward = 0
         #------------------------
 
         else:
@@ -354,52 +354,3 @@ class SatelliteContinuousEnv(gym.Env):
         self.nsteps = 0  
         self.steps_beyond_done = None
         return obs
-
-    def reset_capture(self):
-        # 初期条件　慣性パラメータ
-        self.inertia = np.array([[2.683, 0.0, 0.0], \
-                                [0.0, 2.683, 0.0], \
-                                [0.0, 0.0, 1.897]])
-        self.multi = np.random.uniform(1, high=5)
-        self.tg_inertia = self.inertia*self.multi
-        self.inertia_comb = self.inertia + self.tg_inertia
-        self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
-        self.inertia_inv = np.linalg.inv(self.inertia)
-        
-        # 初期状態 角度(deg)　角速度(rad/s)
-        self.startEuler = np.deg2rad(np.array([10,0,0]))
-        self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
-        self.startOmega = np.array([0,0,0])
-        
-        # 目標値(deg)
-        self.goalEuler = np.deg2rad(np.array([0,0,0]))
-        self.goalQuate = self.dcm2quaternion(self.euler2dcm(self.goalEuler))
-
-        #エラークオータニオンマトリックス
-        er1 = self.goalQuate[0]
-        er2 = self.goalQuate[1]
-        er3 = self.goalQuate[2]
-        er4 = self.goalQuate[3]
-        self.error_Q = np.array([[er1, er2, er3, er4],
-                                [-er2, er1, er4, -er3],
-                                [-er3, -er4, er1, er2],
-                                [-er4, er3, -er2, er1]])
-        
-        self.errorQuate = self.error_Q@self.startQuate
-
-        #エラークオータニオンの微分
-        self.d_errorQuate = self.quaternion_differential(self.startOmega, self.errorQuate)
-        self.pre_state = np.hstack((self.startQuate,self.startOmega))
-        self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega))
-
-        obs = self.state
-        # タイムスタンプをリセット
-        self.nsteps = 0  
-        return obs
-
-    def render(self, mode='human'):
-        #do nothing
-        print('rendering currently not supported.')
-
-    def close(self):
-        print('rendering not supported currently.')

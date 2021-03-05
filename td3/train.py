@@ -113,8 +113,8 @@ def evaluate():
         
     max_steps = int(simutime/dt) -1 # dt is 0.1
     alpha = 0.5
-    k_max = 5
-    alpha_max = 1
+    k_max = 7
+    alpha_max = 2
 
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
