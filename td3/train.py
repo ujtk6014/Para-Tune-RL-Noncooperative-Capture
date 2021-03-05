@@ -114,7 +114,7 @@ def evaluate():
     max_steps = int(simutime/dt) -1 # dt is 0.1
     alpha = 0.5
     k_max = 7
-    alpha_max = 2
+    alpha_max = 1
 
     th_e = np.array(env.inertia.flatten())
     with tqdm(range(max_steps),leave=False) as pbar:
@@ -122,10 +122,10 @@ def evaluate():
             action = agent.get_action(state )
             para_candi = (action + 1)/2
             #----------------control law (Adaptive controller)-----------------------
-            k = para_candi[0]*k_max
-            alpha = para_candi[1]*alpha_max
+            k =7#para_candi[0]*k_max
+            alpha =1# para_candi[1]*alpha_max
             d_tmp = [para_candi[i+2]*2500 +500 for i in range(len(para_candi)-2)]
-            D = np.diag([1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
+            D = np.diag(1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
 
             W = state[8:11]
             x1 = state[1:4]
@@ -276,13 +276,13 @@ def evaluate():
     # # plt.figure(figsize=(yoko,tate),dpi=100)
     plt.subplot(236)
     plt.plot(np.arange(max_steps)*dt, d_hist[:,0],label = r"$D_{1}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,1],label = r"$D_{2}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,2],label = r"$D_{3}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,3],label = r"$D_{4}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,1],label = r"$D_{2}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,2],label = r"$D_{3}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,3],label = r"$D_{4}$")
     plt.plot(np.arange(max_steps)*dt, d_hist[:,4],label = r"$D_{5}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,5],label = r"$D_{6}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,6],label = r"$D_{7}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,7],label = r"$D_{8}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,5],label = r"$D_{6}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,6],label = r"$D_{7}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,7],label = r"$D_{8}$")
     plt.plot(np.arange(max_steps)*dt, d_hist[:,8],label = r"$D_{9}$")
     # plt.title('Action')
     plt.ylabel('d')
