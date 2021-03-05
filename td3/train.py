@@ -122,10 +122,10 @@ def evaluate():
             action = agent.get_action(state )
             para_candi = (action + 1)/2
             #----------------control law (Adaptive controller)-----------------------
-            k =7#para_candi[0]*k_max
-            alpha =1# para_candi[1]*alpha_max
+            k = para_candi[0]*k_max
+            alpha = para_candi[1]*alpha_max
             d_tmp = [para_candi[i+2]*2500 +500 for i in range(len(para_candi)-2)]
-            D = np.diag(1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
+            D = np.diag([1/d_tmp[0],1/d_tmp[1],1/d_tmp[2],1/d_tmp[3],1/d_tmp[4],1/d_tmp[5],1/d_tmp[6],1/d_tmp[7],1/d_tmp[8]])
 
             W = state[8:11]
             x1 = state[1:4]
