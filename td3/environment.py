@@ -287,9 +287,9 @@ class SatelliteContinuousEnv(gym.Env):
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
-                if bool(done_1):
-                    reward = -1
-                else:
+            if bool(done_1):
+                reward = -1
+            else:
             #     if qe_new[0] >= self.angle_thre:
             #         reward = 30
             #     else:
