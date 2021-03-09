@@ -116,7 +116,7 @@ def evaluate():
     k_max = 7
     alpha_max = 1
 
-    th_e = np.array(env.inertia.flatten())
+    th_e = np.array(env.inertia.flatten()*env.multi)
     with tqdm(range(max_steps),leave=False) as pbar:
         for i, ch in enumerate(pbar):
             action = agent.get_action(state )

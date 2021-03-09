@@ -190,7 +190,7 @@ class SatelliteContinuousEnv(gym.Env):
         # Angle, angle speed and speed at which to fail the episode
         self.maxOmega = 0.5
         self.angle_thre = 0.999962
-        self.max_torque = 1
+        self.max_torque = 0.5
 
         self.max_action = 1
         self.lower_action = -1
@@ -278,12 +278,12 @@ class SatelliteContinuousEnv(gym.Env):
         # 報酬関数
         #--------REWARD---------
         if not done:
-            # if max(abs(action)) > self.max_torque:
-            #     reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + 3*action@action) 
-            # else:
+
             #状態と入力を抑えたい
             reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-    
+            if max(abs(action)) > self.max_torque:
+                reward += -5
+
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
