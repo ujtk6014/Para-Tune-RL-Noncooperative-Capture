@@ -282,8 +282,8 @@ class SatelliteContinuousEnv(gym.Env):
 
             #状態と入力を抑えたい
             reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
-            if max(abs(action)) > self.max_torque:
-                reward += -10
+            # if max(abs(action)) > self.max_torque:
+            #     reward += -10
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
