@@ -268,7 +268,7 @@ class SatelliteContinuousEnv(gym.Env):
                 # or abs(action[2]) > self.max_torque 
         done_2 = self.nsteps >= self.max_steps
         done_3 = False
-        angle = np.rad2deg(dcm2euler(env.quaternion2dcm(q_new))).reshape([-1,3])
+        angle = np.rad2deg(self.dcm2euler(self.quaternion2dcm(q_new)))
         if max(abs(angle)) < 1e-2:
             self.omega_count += 1
         if self.omega_count > 5:
@@ -283,7 +283,7 @@ class SatelliteContinuousEnv(gym.Env):
             #状態と入力を抑えたい
             reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
             if max(abs(action)) > self.max_torque:
-                reward += -5
+                reward += -10
 
         elif self.steps_beyond_done is None:
             # epsiode just ended

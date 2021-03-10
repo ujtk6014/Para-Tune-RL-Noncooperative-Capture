@@ -61,7 +61,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
         for episode in range(max_episodes):
             state = env.reset()
             episode_reward = 0    
-            th_e = np.array(env.inertia.flatten())
+            th_e = np.array(env.inertia.flatten()*env.multi)
 
             for step in range(max_steps):
                 # pbar.set_postfix(OrderedDict(multi = env.multi, w_0= np.rad2deg(env.startOmega), steps = step))#OrderedDict(loss=1-episode/5, acc=episode/10))
