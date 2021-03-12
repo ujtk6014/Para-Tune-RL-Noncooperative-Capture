@@ -22,7 +22,7 @@ def train():
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
         "max_episodes": 10000,
-        "max_steps": 500,
+        "max_steps": 700,
         "gamma": 0.99,
         "tau" : 1e-3,
         "buffer_maxlen": 100000,
