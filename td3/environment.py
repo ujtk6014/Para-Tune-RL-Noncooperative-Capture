@@ -138,6 +138,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
         self.g = np.array([0,0,0])  # gravity
+        self.pre_action = np.array([0,0,0]).reshape(-1,1)
 
         #シミュレーションパラメータ　
         self.dt = 0.1 
@@ -279,10 +280,10 @@ class SatelliteContinuousEnv(gym.Env):
         # 報酬関数
         #--------REWARD---------
         if not done:
-            action_delta = pre_action - action
+            action_delta = self.pre_action - action
             #状態と入力を抑えたい
             reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action + self.action_rate_weight*action_delta@action_delta) 
-            pre_action = action
+            self.pre_action = action
             # if max(abs(action)) > self.max_torque:
             #     reward += -10
 
@@ -318,6 +319,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
+        self.pre_action = np.array([0,0,0]).reshape(-1,1)
         
         # 初期状態 角度(deg)　角速度(rad/s)
         self.startEuler = np.deg2rad(np.array([0,0,0]))
