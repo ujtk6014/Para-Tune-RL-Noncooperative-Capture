@@ -138,7 +138,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
         self.g = np.array([0,0,0])  # gravity
-        self.pre_action = np.array([0,0,0]).reshape(-1,1)
+        self.pre_action = np.array([0,0,0])
 
         #シミュレーションパラメータ　
         self.dt = 0.1 
@@ -319,7 +319,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
-        self.pre_action = np.array([0,0,0]).reshape(-1,1)
+        self.pre_action = np.array([0,0,0])
         
         # 初期状態 角度(deg)　角速度(rad/s)
         self.startEuler = np.deg2rad(np.array([0,0,0]))
