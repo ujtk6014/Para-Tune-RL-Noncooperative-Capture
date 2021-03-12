@@ -148,6 +148,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.q_weight =  1*20#1*20
         self.w_weight = 1.5*10#1.5*100
         self.action_weight = 0.25*3#0.25*10
+        self.action_rate_weight = 2
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -220,7 +221,6 @@ class SatelliteContinuousEnv(gym.Env):
         return [seed]
 
     def step(self, action):
-        
         pre_state = self.pre_state
         # q, omega = pre_state
         q = pre_state[:4]
@@ -279,9 +279,10 @@ class SatelliteContinuousEnv(gym.Env):
         # 報酬関数
         #--------REWARD---------
         if not done:
-
+            action_delta = pre_action - action
             #状態と入力を抑えたい
-            reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action) 
+            reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action + self.action_rate_weight*action_delta@action_delta) 
+            pre_action = action
             # if max(abs(action)) > self.max_torque:
             #     reward += -10
 
