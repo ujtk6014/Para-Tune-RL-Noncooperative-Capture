@@ -117,9 +117,10 @@ def evaluate():
     alpha_max = 1
 
     th_e = np.array(env.inertia.flatten()*env.multi)
+
     with tqdm(range(max_steps),leave=False) as pbar:
         for i, ch in enumerate(pbar):
-            action = agent.get_action(state )
+            action = agent.get_action(state)
             para_candi = (action + 1)/2
             #----------------control law (Adaptive controller)-----------------------
             k = para_candi[0]*k_max
@@ -138,7 +139,7 @@ def evaluate():
 
             dth = np.linalg.inv(D) @ Y.T @ x2
             th_e += env.dt*dth
-            env.est_th = [th_e[0],th_e[4],th_e[8]]/(env.max_multi*np.diag(env.inertia))
+            env.est_th = ([th_e[0],th_e[4],th_e[8]]/np.diag(env.inertia) -1)/(env.max_multi-1)
             next_error_state, reward, done, next_state, _ = env.step(input)
             # if i == 20/dt:
             #     env.inertia = env.inertia_comb
@@ -294,7 +295,7 @@ def evaluate():
     # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
     plt.savefig(curr_dir + "/results/td3_eval/results.png")
     plt.show()
-    # -------------------------結果プロット終わり--------------------------------
+    # # -------------------------結果プロット終わり--------------------------------
 def env_pd():
 
     # simulation of the agent solving the cartpole swing-up problem
