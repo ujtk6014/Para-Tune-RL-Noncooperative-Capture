@@ -86,7 +86,7 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
 
                 dth = np.linalg.inv(D) @ Y.T @ x2
                 th_e += env.dt*dth
-                env.est_th = [th_e[0],th_e[4],th_e[8]]/(env.max_multi*np.diag(env.inertia))
+                env.est_th = ([th_e[0],th_e[4],th_e[8]]/np.diag(env.inertia) -1)/(env.max_multi-1)
                 #---------------------------------------------------------------------
                 next_error_state, reward, done, next_state, _ = env.step(input)
                 # if done:
