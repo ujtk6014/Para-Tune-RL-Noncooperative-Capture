@@ -149,7 +149,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.q_weight =  1*20#1*20
         self.w_weight = 1.5*10#1.5*100
         self.action_weight = 0.25*3#0.25*10
-        self.action_rate_weight = 1
+        self.action_rate_weight = 4
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
