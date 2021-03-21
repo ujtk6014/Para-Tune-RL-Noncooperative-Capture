@@ -21,7 +21,7 @@ def train():
         "batch_size": 128,
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
-        "max_episodes": 10000,
+        "max_episodes": 5000,
         "max_steps": 700,
         "gamma": 0.99,
         "tau" : 1e-3,
@@ -30,7 +30,7 @@ def train():
         "policy_freq": 2,
         "noise_clip": 0.5,
         "prioritized_on": False,
-        "State": 'angle:4, ang_rate:4, ang_vel:3',}
+        "State": 'angle:4, ang_rate:4, ang_vel:3, th_e:9',}
     )
     config = wandb.config
 
@@ -103,6 +103,7 @@ def evaluate():
     q = np.empty((0,4))
     w = np.empty((0,3))
     actions = np.empty((0,3))
+    r_hist = np.empty((0,4))
     k_hist = []
     alpha_hist = []
     d_hist = np.empty((0,9))
@@ -139,7 +140,8 @@ def evaluate():
 
             dth = np.linalg.inv(D) @ Y.T @ x2
             th_e += env.dt*dth
-            env.est_th = ([th_e[0],th_e[4],th_e[8]]/np.diag(env.inertia) -1)/(env.max_multi-1)
+            # env.est_th = ([th_e[0],th_e[4],th_e[8]]/np.diag(env.inertia) -1)/(env.max_multi-1)
+            env.est_th = th_e.flatten()/25
             next_error_state, reward, done, next_state, _ = env.step(input)
             # if i == 20/dt:
             #     env.inertia = env.inertia_comb
@@ -154,6 +156,7 @@ def evaluate():
             actions = np.append(actions, input.reshape(1,-1),axis=0)
             k_hist.append(k)
             alpha_hist.append(alpha)
+            r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3,env.r4]).reshape(1,-1),axis=0)
             d_hist = np.append(d_hist, np.array(d_tmp).reshape(1,-1),axis=0)
             state = next_error_state
 
@@ -182,32 +185,32 @@ def evaluate():
     yoko = 4.0
     #------------------------------------------------
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(max_steps)*dt, q[:,0],label =r"$q_{0}$")
-    plt.plot(np.arange(max_steps)*dt, q[:,1],label =r"$q_{1}$")
-    plt.plot(np.arange(max_steps)*dt, q[:,2],label =r"$q_{2}$")
-    plt.plot(np.arange(max_steps)*dt, q[:,3],label =r"$q_{3}$")
-    # plt.title('Quaternion')
-    plt.ylabel('quaternion value')
-    plt.xlabel(r'time [s]')
-    plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=4)
-    plt.tight_layout()
-    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    # plt.grid(True)
-    plt.savefig(curr_dir + "/results/td3_eval/plot_quat.png")
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.plot(np.arange(max_steps)*dt, q[:,0],label =r"$q_{0}$")
+    # plt.plot(np.arange(max_steps)*dt, q[:,1],label =r"$q_{1}$")
+    # plt.plot(np.arange(max_steps)*dt, q[:,2],label =r"$q_{2}$")
+    # plt.plot(np.arange(max_steps)*dt, q[:,3],label =r"$q_{3}$")
+    # # plt.title('Quaternion')
+    # plt.ylabel('quaternion value')
+    # plt.xlabel(r'time [s]')
+    # plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=4)
+    # plt.tight_layout()
+    # plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # # plt.grid(True)
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_quat.png")
 
-    plt.figure(figsize=(yoko,tate),dpi=100)
-    plt.plot(np.arange(max_steps)*dt, qe[:,0],label =r"$q_{e0}$")
-    plt.plot(np.arange(max_steps)*dt, qe[:,1],label =r"$q_{e1}$")
-    plt.plot(np.arange(max_steps)*dt, qe[:,2],label =r"$q_{e2}$")
-    plt.plot(np.arange(max_steps)*dt, qe[:,3],label =r"$q_{e3}$")
-    # plt.title('Quaternion Error')
-    plt.ylabel('quaternion error value')
-    plt.xlabel(r'time [s]')
-    plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=4)
-    plt.tight_layout()
-    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
-    plt.savefig(curr_dir + "/results/td3_eval/plot_quate_error.png")
+    # plt.figure(figsize=(yoko,tate),dpi=100)
+    # plt.plot(np.arange(max_steps)*dt, qe[:,0],label =r"$q_{e0}$")
+    # plt.plot(np.arange(max_steps)*dt, qe[:,1],label =r"$q_{e1}$")
+    # plt.plot(np.arange(max_steps)*dt, qe[:,2],label =r"$q_{e2}$")
+    # plt.plot(np.arange(max_steps)*dt, qe[:,3],label =r"$q_{e3}$")
+    # # plt.title('Quaternion Error')
+    # plt.ylabel('quaternion error value')
+    # plt.xlabel(r'time [s]')
+    # plt.legend(loc="lower center", bbox_to_anchor=(0.5,1.05), ncol=4)
+    # plt.tight_layout()
+    # plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    # plt.savefig(curr_dir + "/results/td3_eval/plot_quate_error.png")
 
     plt.figure(figsize=(12,5),dpi=100)
     plt.tight_layout()
@@ -277,13 +280,13 @@ def evaluate():
     # # plt.figure(figsize=(yoko,tate),dpi=100)
     plt.subplot(236)
     plt.plot(np.arange(max_steps)*dt, d_hist[:,0],label = r"$D_{1}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,1],label = r"$D_{2}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,2],label = r"$D_{3}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,3],label = r"$D_{4}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,1],label = r"$D_{2}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,2],label = r"$D_{3}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,3],label = r"$D_{4}$")
     plt.plot(np.arange(max_steps)*dt, d_hist[:,4],label = r"$D_{5}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,5],label = r"$D_{6}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,6],label = r"$D_{7}$")
-    plt.plot(np.arange(max_steps)*dt, d_hist[:,7],label = r"$D_{8}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,5],label = r"$D_{6}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,6],label = r"$D_{7}$")
+    # plt.plot(np.arange(max_steps)*dt, d_hist[:,7],label = r"$D_{8}$")
     plt.plot(np.arange(max_steps)*dt, d_hist[:,8],label = r"$D_{9}$")
     # plt.title('Action')
     plt.ylabel('d')
@@ -294,6 +297,22 @@ def evaluate():
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     # plt.savefig(curr_dir + "/results/td3_eval/plot_d.png")
     plt.savefig(curr_dir + "/results/td3_eval/results.png")
+
+    plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,0],label = r"$q$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,3],label = r"$\Delta\tau$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, np.sum(r_hist,axis = 1),label = r"$toal$",linestyle='dotted')
+    # plt.title('Action')
+    plt.ylabel('reward')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    plt.legend()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    plt.savefig(curr_dir + "/results/td3_eval/plot_reward.png")
+
     plt.show()
     # # -------------------------結果プロット終わり--------------------------------
 def env_pd():
