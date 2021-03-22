@@ -11,7 +11,6 @@ import wandb
 from network import TD3Agent
 from utils import *
 
-
 def train():
     # simulation of the agent solving the spacecraft attitude control problem
     env = make("SatelliteContinuous")
@@ -22,7 +21,7 @@ def train():
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
         "max_episodes": 5000,
-        "max_steps": 700,
+        "max_steps": 600,
         "gamma": 0.99,
         "tau" : 1e-3,
         "buffer_maxlen": 100000,
@@ -80,7 +79,6 @@ def train():
     if not os.path.isdir("models"):
         os.mkdir("models")
     torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
-
 
 def evaluate():
     # simulation of the agent solving the cartpole swing-up problem
@@ -161,7 +159,8 @@ def evaluate():
             state = next_error_state
 
     env.close()
-    #-------------------------------結果のプロット----------------------------------
+    #-------------------------------結果のプロット----------------------------------#
+    #region
     #show the total reward
     print("Total Reward is : " + str(r))
     # データの形の整理
@@ -169,7 +168,7 @@ def evaluate():
     qe = qe.reshape([-1,4])
     w = w.reshape([-1,3])
     # angle = [e for i in]
-
+ 
     # plot the angle and action curve
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
@@ -318,9 +317,9 @@ def evaluate():
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/td3_eval/plot_reward.png")
-
     plt.show()
-    # # -------------------------結果プロット終わり--------------------------------
+    #endregion
+    # ----------------------------結果プロット終わり--------------------------------#
 def env_pd():
 
     # simulation of the agent solving the cartpole swing-up problem
@@ -348,8 +347,8 @@ def env_pd():
     action = np.array([0,0,0]).reshape(1,3)
     actions = np.append(actions, action,axis=0)
 
-    dt = 0.01
-    simulation_iterations = int(50/0.01) -1 # dt is 0.01
+    dt = 0.1
+    simulation_iterations = int(50/0.1) -1 # dt is 0.01
 
     for i in range(1, simulation_iterations):
         action = np.squeeze(action)
@@ -360,11 +359,11 @@ def env_pd():
         # w=np.append(w,next_error_state[2].reshape(1,-1),axis=0)
         q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
         qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
-        w=np.append(w,next_error_state[-3:].reshape(1,-1),axis=0)
+        w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
         r += reward
         # state = next_state
         #----------------control law (PID controller)-----------------------
-        action = -Kp@next_error_state[:4].reshape(-1,1)-Kd@next_error_state[-3:].reshape(-1,1)
+        action = -Kp@next_error_state[:4].reshape(-1,1)-Kd@next_error_state[8:11].reshape(-1,1)
         actions = np.append(actions, action.reshape(1,-1),axis=0)
         #--------------------------------------------------------------------
 
@@ -497,15 +496,11 @@ def env_adaptive():
         action = np.squeeze(action)
 
         # if i == 20/dt:
-        #     env.inertia = env.inertia_comb
-        #     env.inertia_inv = np.linalg.inv(env.inertia)
-        #     env.pre_state[-3:] += np.deg2rad([5,-5,5])
-        #     env.state[-3:] += np.deg2rad([5,-5,5])
-        
-        next_error_state, reward, done, next_state, _ = env.step(action)
+        #     env.inertia = env.inertia_comb   #region
         q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
         qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
-        w=np.append(w,next_error_state[-3:].reshape(1,-1),axis=0)
+        w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
+        r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3,env.r4]).reshape(1,-1),axis=0)
         r += reward
     #----------------control law (Adaptive controller)-----------------------
         W = next_error_state[8:11]
@@ -536,6 +531,8 @@ def env_adaptive():
     if not os.path.isdir("results"):
         os.mkdir("results")
 
+    #---------------------結果のプロット開始-------------------------#
+    #region
     # plot the angle and action curve
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
@@ -616,7 +613,24 @@ def env_adaptive():
     # plt.ylim(-20, 20)
     plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
     plt.savefig(curr_dir + "/results/adap_test/plot_angle.png")
+
+    plt.figure(figsize=(yoko,tate),dpi=100)
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,0],label = r"$q$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, r_hist[:,3],label = r"$\Delta\tau$ pnlty")
+    plt.plot(np.arange(max_steps)*dt, np.sum(r_hist,axis = 1),label = r"$toal$",linestyle='dotted')
+    # plt.title('Action')
+    plt.ylabel('reward')
+    plt.xlabel(r'time [s]')
+    plt.tight_layout()
+    plt.legend()
+    # plt.ylim(-20, 20)
+    plt.grid(True, color='k', linestyle='dotted', linewidth=0.8)
+    plt.savefig(curr_dir + "/results/adap_test/plot_reward.png")
     plt.show()    
+    #endregion
+    #---------------------結果のプロット終わり-----------------------#
 
 if __name__ == '__main__':
     plt.close()

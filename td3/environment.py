@@ -142,12 +142,12 @@ class SatelliteContinuousEnv(gym.Env):
 
         #シミュレーションパラメータ　
         self.dt = 0.1 
-        self.simutime =70
+        self.simutime =60
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight = 1*5#1*20
-        self.w_weight = 1.5*10#1.5*100
+        self.q_weight = 1*10#1*20
+        self.w_weight = 1.5*5#1.5*100
         self.action_weight = 0.25#0.25*10
         self.action_rate_weight = 0.1
         
