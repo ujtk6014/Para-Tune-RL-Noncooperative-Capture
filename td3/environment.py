@@ -132,7 +132,7 @@ class SatelliteContinuousEnv(gym.Env):
                                 [0.0, 0.0, 1.897]])
         self.max_multi = 10
         self.multi = np.random.randint(100,self.max_multi*100)/100
-        self.est_th = np.diag(self.inertia)
+        self.est_th = self.inertia.flatten()*self.multi/25#np.diag(self.inertia)
         self.tg_inertia = self.inertia*self.multi
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
@@ -146,10 +146,10 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight =  1*20#1*20
+        self.q_weight = 1*5#1*20
         self.w_weight = 1.5*10#1.5*100
-        self.action_weight = 0.25*3#0.25*10
-        self.action_rate_weight = 4
+        self.action_weight = 0.25#0.25*10
+        self.action_rate_weight = 0.1
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -197,21 +197,16 @@ class SatelliteContinuousEnv(gym.Env):
         self.max_action = 1
         self.lower_action = -1
         upper_bound = self.max_action*np.ones(11,dtype=np.float32)
-        # upper_bound = np.array([self.max_action, self.max_action, self.max_action,self.max_action],dtype=np.float32)
-        # upper_bound = np.array([np.finfo(np.float32).max, np.finfo(np.float32).max, np.finfo(np.float32).max, np.finfo(np.float32).max],dtype=np.float32)
-        # lower_bound = np.array([self.lower_action, self.lower_action, self.lower_action,self.lower_action],dtype=np.float32)
         lower_bound = -self.max_action*np.ones(11,dtype=np.float32)
         #------------------------------------------------------------------------------------------------------------
 
         # 状態量（姿勢角４・姿勢角微分４・角速度３・推定慣性モーメントの対角成分 ３）
-        high = np.ones(14,dtype = np.float32)*np.finfo(np.float32).max
+        high = np.ones(20,dtype = np.float32)*np.finfo(np.float32).max
 
         self.action_space = spaces.Box(lower_bound, upper_bound)
         self.observation_space = spaces.Box(-high, high)
         self.pre_state = np.hstack((self.startQuate,self.startOmega))
         self.state = np.hstack((self.errorQuate,self.d_errorQuate, self.startOmega, self.est_th))
-        # self.pre_state = [self.startQuate,self.startOmega]
-        # self.state = [self.errorQuate,self.d_errorQuate, self.startOmega]
 
         self.seed()
         self.viewer = None
@@ -230,11 +225,7 @@ class SatelliteContinuousEnv(gym.Env):
         state = self.state
         qe = state[:4]
 
-        #ステートアップデート（オイラー法）
-        # q_dot = self.quaternion_differential(omega, q)
-        # omega_dot = self.omega_differential(omega,self.inertia_inv,action)
-        # q = q + q_dot * self.dt
-        # omega = omega + omself.steps_beyond_done = Noneferential(omega,self.inertia_comb_inv,self.inertia_comb,action)
+        #ルンゲクッタ
         k1 = self.omega_differential(omega,self.inertia_comb_inv,self.inertia_comb,action)
         k2 = self.omega_differential(omega + 0.5*self.dt*k1, self.inertia_comb_inv,self.inertia_comb,action)
         k3 = self.omega_differential(omega + 0.5*self.dt*k2, self.inertia_comb_inv,self.inertia_comb,action)
@@ -279,31 +270,38 @@ class SatelliteContinuousEnv(gym.Env):
 
         # 報酬関数
         #--------REWARD---------
+        #入力の変化量計算
+        action_delta = self.pre_action - action
         if not done:
-            action_delta = self.pre_action - action
             #状態と入力を抑えたい
-            reward = -(self.q_weight*((1-qe_new[0])**2 + qe_new[1:]@qe_new[1:]) + self.w_weight*omega_new@omega_new + self.action_weight*action@action + self.action_rate_weight*action_delta@action_delta) 
-            self.pre_action = action
-            # if max(abs(action)) > self.max_torque:
-            #     reward += -10
+            self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
+            self.r2 = self.w_weight*omega_new@omega_new
+            self.r3 = self.action_weight*action@action
+            self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
+            reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
             if bool(done_1):
+                self.r1 = 0
+                self.r2 = 0
+                self.r3 = 0
+                self.r4 = 0
                 reward = -1
             else:
-            #     if qe_new[0] >= self.angle_thre:
-            #         reward = 30
-            #     else:
-                reward = 0
+                self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
+                self.r2 = self.w_weight*omega_new@omega_new
+                self.r3 = self.action_weight*action@action
+                self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
+                reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
         #------------------------
-
         else:
             if self.steps_beyond_done == 0:
                 logger.warn("You are calling 'step()' even though this environment has already returned done = True.")
             self.steps_beyond_done += 1
             reward = 0.0
+        self.pre_action = action
 
         return self.state, reward, done, self.pre_state, {}
 
@@ -315,7 +313,8 @@ class SatelliteContinuousEnv(gym.Env):
                                 [0.0, 0.0, 1.897]])
         self.multi = np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
-        self.est_th = ((self.multi-1)*np.diag(self.inertia))/((self.max_multi-1)*np.diag(self.inertia))
+        self.est_th = self.inertia.flatten()*self.multi/25#np.diag(self.inertia)
+        # self.est_th = (self.multi*np.diag(self.inertia))/((self.max_multi+1)*np.diag(self.inertia))
         self.inertia_comb = self.inertia + self.tg_inertia
         self.inertia_comb_inv = np.linalg.inv(self.inertia_comb)
         self.inertia_inv = np.linalg.inv(self.inertia)
