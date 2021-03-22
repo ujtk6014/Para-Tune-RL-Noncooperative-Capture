@@ -178,6 +178,12 @@ def evaluate():
     plt.rcParams['ytick.direction'] = 'in' # y axis in 
     plt.rcParams['axes.linewidth'] = 1.0 # axis line width
     plt.rcParams['axes.grid'] = True # make grid
+    plt.rcParams["legend.loc"] = "best"         # 凡例の位置、"best"でいい感じのところ
+    plt.rcParams["legend.frameon"] = True       # 凡例を囲うかどうか、Trueで囲う、Falseで囲わない
+    plt.rcParams["legend.framealpha"] = 1.0     # 透過度、0.0から1.0の値を入れる
+    plt.rcParams["legend.facecolor"] = "white"  # 背景色
+    # plt.rcParams["legend.edgecolor"] = "black"  # 囲いの色
+    plt.rcParams["legend.fancybox"] = True     # Trueにすると囲いの四隅が丸くなる
     tate = 2.0
     yoko = 4.0
     #------------------------------------------------
