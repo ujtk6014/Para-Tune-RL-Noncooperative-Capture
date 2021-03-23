@@ -142,14 +142,14 @@ class SatelliteContinuousEnv(gym.Env):
 
         #シミュレーションパラメータ　
         self.dt = 0.1 
-        self.simutime =60
+        self.simutime = 60
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight = 1*10#1*20
-        self.w_weight = 1.5*5#1.5*100
-        self.action_weight = 0.25#0.25*10
-        self.action_rate_weight = 0.1
+        self.q_weight = 500#1*20
+        self.w_weight = 1*50#1.5*100
+        self.action_weight = 0.25*2#0.25*10
+        self.action_rate_weight = 0.1*2
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -279,6 +279,8 @@ class SatelliteContinuousEnv(gym.Env):
             self.r3 = self.action_weight*action@action
             self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
             reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
+            if max(abs(action)) > 0.5:
+                reward += -5 
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
