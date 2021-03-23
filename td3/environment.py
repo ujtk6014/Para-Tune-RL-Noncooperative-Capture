@@ -280,7 +280,7 @@ class SatelliteContinuousEnv(gym.Env):
             self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
             reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
             if max(abs(action)) > 0.5:
-                reward += -5 
+                reward += -25 
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
