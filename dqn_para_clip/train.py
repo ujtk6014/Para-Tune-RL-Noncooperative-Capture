@@ -368,8 +368,8 @@ def env_pd():
     action = np.array([0,0,0]).reshape(1,3)
     actions = np.append(actions, action,axis=0)
 
-    dt = 0.01
-    max_steps = int(50/0.01) -1 # dt is 0.01
+    dt = 0.1
+    max_steps = int(30/0.1) -1 # dt is 0.01
 
     for i in range(1, max_steps):
         action = np.squeeze(action)
@@ -384,7 +384,7 @@ def env_pd():
         r += reward
         # state = next_state
         #----------------control law (PID controller)-----------------------
-        action = -Kp@next_error_state[:4].reshape(-1,1)-Kd@next_error_state[-3:].reshape(-1,1)
+        action = -Kp@next_error_state[:4].reshape(-1,1)-Kd@next_error_state[4:7].reshape(-1,1)
         actions = np.append(actions, action.reshape(1,-1),axis=0)
         #--------------------------------------------------------------------
 
