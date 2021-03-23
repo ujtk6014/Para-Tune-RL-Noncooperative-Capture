@@ -97,6 +97,7 @@ def evaluate():
 
     print("The target multi :" + str(env.multi) +"\n")
     r = 0
+    R = np.empty((0,1))
     qe = np.empty((0,4))
     q = np.empty((0,4))
     w = np.empty((0,3))
@@ -151,10 +152,11 @@ def evaluate():
             qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
             w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
             r += reward
+            R = np.append(R,reward)
             actions = np.append(actions, input.reshape(1,-1),axis=0)
             k_hist.append(k)
             alpha_hist.append(alpha)
-            r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3,env.r4]).reshape(1,-1),axis=0)
+            r_hist = np.append(r_hist, np.array([-env.r1,-env.r2,-env.r3,-env.r4]).reshape(1,-1),axis=0)
             d_hist = np.append(d_hist, np.array(d_tmp).reshape(1,-1),axis=0)
             state = next_error_state
 
@@ -186,8 +188,8 @@ def evaluate():
     plt.rcParams["legend.facecolor"] = "white"  # 背景色
     # plt.rcParams["legend.edgecolor"] = "black"  # 囲いの色
     plt.rcParams["legend.fancybox"] = True     # Trueにすると囲いの四隅が丸くなる
-    tate = 2.0
-    yoko = 4.0
+    tate = 4.0
+    yoko = 8.0
     #------------------------------------------------
 
     # plt.figure(figsize=(yoko,tate),dpi=100)
@@ -308,7 +310,8 @@ def evaluate():
     plt.plot(np.arange(max_steps)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
     plt.plot(np.arange(max_steps)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
     plt.plot(np.arange(max_steps)*dt, r_hist[:,3],label = r"$\Delta\tau$ pnlty")
-    plt.plot(np.arange(max_steps)*dt, np.sum(r_hist,axis = 1),label = r"$toal$",linestyle='dotted')
+    plt.plot(np.arange(max_steps)*dt, np.sum(r_hist,axis = 1),label = r"$R_{total}$",linestyle='dotted')
+    plt.plot(np.arange(max_steps)*dt, R,label = r"$total$")
     # plt.title('Action')
     plt.ylabel('reward')
     plt.xlabel(r'time [s]')
