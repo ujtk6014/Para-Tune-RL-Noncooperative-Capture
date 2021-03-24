@@ -280,17 +280,17 @@ class SatelliteContinuousEnv(gym.Env):
             self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
             reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
             if max(abs(action)) > 0.5:
-                reward += -25 
+                reward += -100 
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
             self.steps_beyond_done = 0
-            if bool(done_1):
+            if bool(done_3):
                 self.r1 = 0
                 self.r2 = 0
                 self.r3 = 0
                 self.r4 = 0
-                reward = -1
+                reward = 50
             else:
                 self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
                 self.r2 = self.w_weight*omega_new@omega_new
@@ -313,7 +313,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,self.max_multi*100)/100
+        self.multi = 10#np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = self.inertia.flatten()*self.multi/25#np.diag(self.inertia)
         # self.est_th = (self.multi*np.diag(self.inertia))/((self.max_multi+1)*np.diag(self.inertia))
