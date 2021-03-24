@@ -313,7 +313,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = np.random.randint(100,self.max_multi*100)/100
+        self.multi =10#np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = self.inertia.flatten()*self.multi/25#np.diag(self.inertia)
         # self.est_th = (self.multi*np.diag(self.inertia))/((self.max_multi+1)*np.diag(self.inertia))
