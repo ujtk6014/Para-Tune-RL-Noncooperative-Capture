@@ -73,7 +73,6 @@ class Critic(nn.Module):
         q1 = self.linear4(q1)
         return q1
 
-
 # neural network to approximate actor function
 class Actor(nn.Module):
     def __init__(self, obs_dim, action_dim):
