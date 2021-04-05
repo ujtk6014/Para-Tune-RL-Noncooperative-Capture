@@ -147,7 +147,7 @@ class SatelliteContinuousEnv(gym.Env):
         
         #報酬パラメータ
         self.q_weight = 50#1*20
-        self.w_weight = 1*50#1.5*100
+        self.w_weight = 50#1.5*100
         self.action_weight = 0.25*2#0.25*10
         self.action_rate_weight = 0.1*2
         
