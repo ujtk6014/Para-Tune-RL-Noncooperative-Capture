@@ -89,7 +89,7 @@ def evaluate():
     curr_dir = os.path.abspath(os.getcwd())
 
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
-    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl",map_location='cpu')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home_20210324.pkl",map_location='cpu')
     agent.device = torch.device('cpu')
     agent.train = False
 
