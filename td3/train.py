@@ -175,9 +175,9 @@ def evaluate():
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
     plt.rcParams['mathtext.fontset'] = 'stix' # math fontの設定
-    plt.rcParams["font.size"] = 8 # 全体のフォントサイズが変更されます。
-    plt.rcParams['xtick.labelsize'] = 8 # 軸だけ変更されます。
-    plt.rcParams['ytick.labelsize'] = 8 # 軸だけ変更されます 
+    plt.rcParams["font.size"] = 12# 全体のフォントサイズが変更されます。
+    plt.rcParams['xtick.labelsize'] = 12 # 軸だけ変更されます。
+    plt.rcParams['ytick.labelsize'] = 12 # 軸だけ変更されます 
     plt.rcParams['xtick.direction'] = 'in' # x axis in
     plt.rcParams['ytick.direction'] = 'in' # y axis in 
     plt.rcParams['axes.linewidth'] = 1.0 # axis line width
@@ -188,8 +188,8 @@ def evaluate():
     plt.rcParams["legend.facecolor"] = "white"  # 背景色
     # plt.rcParams["legend.edgecolor"] = "black"  # 囲いの色
     plt.rcParams["legend.fancybox"] = True     # Trueにすると囲いの四隅が丸くなる
-    tate = 4.0
-    yoko = 8.0
+    tate = 3.0
+    yoko = 5.0
     #------------------------------------------------
 
     # plt.figure(figsize=(yoko,tate),dpi=100)
@@ -310,7 +310,7 @@ def evaluate():
     plt.plot(np.arange(max_steps)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
     plt.plot(np.arange(max_steps)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
     plt.plot(np.arange(max_steps)*dt, r_hist[:,3],label = r"$\Delta\tau$ pnlty")
-    plt.plot(np.arange(max_steps)*dt, np.sum(r_hist,axis = 1),label = r"$R_{total}$",linestyle='dotted')
+    # plt.plot(np.arange(max_steps)*dt, np.sum(r_hist,axis = 1),label = r"$R_{total}$",linestyle='dotted')
     plt.plot(np.arange(max_steps)*dt, R,label = r"$total$")
     # plt.title('Action')
     plt.ylabel('reward')
