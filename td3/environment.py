@@ -280,7 +280,7 @@ class SatelliteContinuousEnv(gym.Env):
             self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
             reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
             if max(abs(action)) > 0.5:
-                reward += -100 
+                reward += -25 
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
@@ -290,7 +290,7 @@ class SatelliteContinuousEnv(gym.Env):
                 self.r2 = 0
                 self.r3 = 0
                 self.r4 = 0
-                reward = 1000
+                reward = 0
             else:
                 self.r1 = self.q_weight*((1-qe_new[0])**2+ qe_new[1:]@qe_new[1:])
                 self.r2 = self.w_weight*omega_new@omega_new
@@ -327,7 +327,7 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        coef = 2*np.random.randint(0,2,size=3)-1
+        coef = 1#2*np.random.randint(0,2,size=3)-1
         self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)
