@@ -20,7 +20,7 @@ def train():
         "batch_size": 128,
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
-        "max_episodes": 10000,
+        "max_episodes": 3000,
         "max_steps": 500,
         "gamma": 0.99,
         "tau" : 1e-3,
@@ -89,7 +89,7 @@ def evaluate():
     curr_dir = os.path.abspath(os.getcwd())
 
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
-    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home_20210324.pkl",map_location='cpu')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl",map_location='cpu')
     agent.device = torch.device('cpu')
     agent.train = False
 
