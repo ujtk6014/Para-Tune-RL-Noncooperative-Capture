@@ -108,7 +108,7 @@ def evaluate():
     d_hist = np.empty((0,9))
 
     dt = 0.1
-    simutime = 50
+    simutime = 100
     # env.simutime = simutime
         
     max_steps = int(simutime/dt) -1 # dt is 0.1
