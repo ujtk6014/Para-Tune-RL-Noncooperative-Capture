@@ -146,10 +146,14 @@ class SatelliteContinuousEnv(gym.Env):
         self.omega_count = 0
         
         #報酬パラメータ
-        self.q_weight = 50#1*20
-        self.w_weight = 50#1.5*100
+        self.q_weight = 100#1*20
+        self.w_weight = 80#1.5*100
         self.action_weight = 0.25*2#0.25*10
+<<<<<<< HEAD
         self.action_rate_weight = 0.1*8
+=======
+        self.action_rate_weight = 0.1*3
+>>>>>>> f41a5d44c281a490aa76acc629f29f19318dd4c5
         
         # 初期状態 角度(deg)　角速度(rad/s)
         # Rest to Rest
@@ -280,7 +284,11 @@ class SatelliteContinuousEnv(gym.Env):
             self.r4 = self.action_rate_weight*(action_delta@action_delta)/self.dt
             reward = -(self.r1 + self.r2 + self.r3 + self.r4) 
             if max(abs(action)) > 0.5:
+<<<<<<< HEAD
                 reward += -25 
+=======
+                reward += -15 
+>>>>>>> f41a5d44c281a490aa76acc629f29f19318dd4c5
 
         elif self.steps_beyond_done is None:
             # epsiode just ended
@@ -313,7 +321,7 @@ class SatelliteContinuousEnv(gym.Env):
         self.inertia = np.array([[2.683, 0.0, 0.0], \
                                 [0.0, 2.683, 0.0], \
                                 [0.0, 0.0, 1.897]])
-        self.multi = 10#np.random.randint(100,self.max_multi*100)/100
+        self.multi = np.random.randint(100,self.max_multi*100)/100
         self.tg_inertia = self.inertia*self.multi
         self.est_th = self.inertia.flatten()*self.multi/25#np.diag(self.inertia)
         # self.est_th = (self.multi*np.diag(self.inertia))/((self.max_multi+1)*np.diag(self.inertia))

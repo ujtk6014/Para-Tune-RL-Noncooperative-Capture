@@ -20,7 +20,7 @@ def train():
         "batch_size": 128,
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
-        "max_episodes": 5000,
+        "max_episodes": 3000,
         "max_steps": 500,
         "gamma": 0.99,
         "tau" : 1e-3,
@@ -89,7 +89,7 @@ def evaluate():
     curr_dir = os.path.abspath(os.getcwd())
 
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
-    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home_20210324.pkl",map_location='cpu')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl",map_location='cpu')
     agent.device = torch.device('cpu')
     agent.train = False
 
@@ -108,7 +108,7 @@ def evaluate():
     d_hist = np.empty((0,9))
 
     dt = 0.1
-    simutime = 50
+    simutime = 100
     # env.simutime = simutime
         
     max_steps = int(simutime/dt) -1 # dt is 0.1
@@ -175,7 +175,11 @@ def evaluate():
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
     plt.rcParams['mathtext.fontset'] = 'stix' # math fontの設定
+<<<<<<< HEAD
     plt.rcParams["font.size"] = 12 # 全体のフォントサイズが変更されます。
+=======
+    plt.rcParams["font.size"] = 12# 全体のフォントサイズが変更されます。
+>>>>>>> f41a5d44c281a490aa76acc629f29f19318dd4c5
     plt.rcParams['xtick.labelsize'] = 12 # 軸だけ変更されます。
     plt.rcParams['ytick.labelsize'] = 12 # 軸だけ変更されます 
     plt.rcParams['xtick.direction'] = 'in' # x axis in
@@ -189,7 +193,11 @@ def evaluate():
     # plt.rcParams["legend.edgecolor"] = "black"  # 囲いの色
     plt.rcParams["legend.fancybox"] = True     # Trueにすると囲いの四隅が丸くなる
     tate = 3.0
+<<<<<<< HEAD
     yoko = 6.0
+=======
+    yoko = 5.0
+>>>>>>> f41a5d44c281a490aa76acc629f29f19318dd4c5
     #------------------------------------------------
 
     # plt.figure(figsize=(yoko,tate),dpi=100)
