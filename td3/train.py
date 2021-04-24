@@ -175,11 +175,7 @@ def evaluate():
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
     plt.rcParams['mathtext.fontset'] = 'stix' # math fontの設定
-<<<<<<< HEAD
-    plt.rcParams["font.size"] = 12 # 全体のフォントサイズが変更されます。
-=======
     plt.rcParams["font.size"] = 12# 全体のフォントサイズが変更されます。
->>>>>>> f41a5d44c281a490aa76acc629f29f19318dd4c5
     plt.rcParams['xtick.labelsize'] = 12 # 軸だけ変更されます。
     plt.rcParams['ytick.labelsize'] = 12 # 軸だけ変更されます 
     plt.rcParams['xtick.direction'] = 'in' # x axis in
@@ -193,11 +189,7 @@ def evaluate():
     # plt.rcParams["legend.edgecolor"] = "black"  # 囲いの色
     plt.rcParams["legend.fancybox"] = True     # Trueにすると囲いの四隅が丸くなる
     tate = 3.0
-<<<<<<< HEAD
-    yoko = 6.0
-=======
     yoko = 5.0
->>>>>>> f41a5d44c281a490aa76acc629f29f19318dd4c5
     #------------------------------------------------
 
     # plt.figure(figsize=(yoko,tate),dpi=100)
