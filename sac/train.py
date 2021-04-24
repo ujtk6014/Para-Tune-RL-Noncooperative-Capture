@@ -483,6 +483,7 @@ def env_adaptive():
     print( "the multi is :" + str(env.multi))
     r = 0
     qe = np.empty((0,4))
+    R = np.empty((0,1))
     q = np.empty((0,4))
     w = np.empty((0,3))
     actions = np.empty((0,3))
@@ -512,8 +513,9 @@ def env_adaptive():
         q=np.append(q,next_state[:4].reshape(1,-1),axis=0)
         qe=np.append(qe,next_error_state[:4].reshape(1,-1),axis=0)
         w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
-        r_hist = np.append(r_hist, np.array([env.r1,env.r2,env.r3,env.r4]).reshape(1,-1),axis=0)
+        r_hist = np.append(r_hist, -np.array([env.r1,env.r2,env.r3,env.r4]).reshape(1,-1),axis=0)
         r += reward
+        R = np.append(R,reward)
     #----------------control law (Adaptive controller)-----------------------
         W = next_error_state[8:11]
         x1 = next_error_state[1:4]
@@ -646,7 +648,8 @@ def env_adaptive():
     plt.plot(np.arange(max_steps-1)*dt, r_hist[:,1],label = r"$\omega$ pnlty")
     plt.plot(np.arange(max_steps-1)*dt, r_hist[:,2],label = r"$\tau$ pnlty")
     plt.plot(np.arange(max_steps-1)*dt, r_hist[:,3],label = r"$\Delta\tau$ pnlty")
-    plt.plot(np.arange(max_steps-1)*dt, np.sum(r_hist,axis = 1),label = r"$toal$",linestyle='dotted')
+    plt.plot(np.arange(max_steps-1)*dt, R, label = r"$toal$",linestyle='dotted')
+    # plt.plot(np.arange(max_steps-1)*dt, np.sum(r_hist,axis = 1),label = r"$toal$",linestyle='dotted')
     # plt.title('Action')
     plt.ylabel('reward')
     plt.xlabel(r'time [s]')

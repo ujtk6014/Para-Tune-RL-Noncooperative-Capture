@@ -487,7 +487,7 @@ def env_adaptive():
 
     #----------------------control parameters----------------------------
     alpha = 0.5
-    k = 2
+    k = 40
     zeta = 0.2
     D = np.diag([4e-4,1,1,1,5.8e-4,1,1,1,5.2e-4])
     th = env.inertia_comb.flatten()
