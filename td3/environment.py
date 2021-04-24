@@ -17,6 +17,7 @@ class SatelliteContinuousEnv(gym.Env):
         'video.frames_per_second': 50
     }
     #----------toolbox----------
+    #region
     def skew(self,vec): 
         # create a skew symmetric matrix from a vector
         mat = np.array([[0, -vec[2], vec[1]],
@@ -120,7 +121,7 @@ class SatelliteContinuousEnv(gym.Env):
     def omega_differential(self, omega, inertia_inv, inertia, action):
         ddt_omega =  inertia_inv @ (-np.cross(omega, inertia @ omega) + action)
         return ddt_omega
-    
+    #endregion
     #-------end toolbox, start actual env-------
 
 
