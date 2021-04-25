@@ -327,7 +327,7 @@ class SatelliteContinuousEnv(gym.Env):
         # self.startEuler = np.deg2rad(np.array([10,0,0]))
         self.startQuate = self.dcm2quaternion(self.euler2dcm(self.startEuler))
         # self.startOmega = np.array([0,0,0])
-        coef = 2*np.random.randint(0,2,size=3)-1
+        coef = 1#2*np.random.randint(0,2,size=3)-1
         self.startOmega = coef* np.deg2rad(np.array([5,-5,5]))#+ np.random.uniform(-1, 1, size=3))
 
         # 目標値(deg)

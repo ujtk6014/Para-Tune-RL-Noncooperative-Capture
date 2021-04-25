@@ -86,7 +86,7 @@ def train():
 
     if not os.path.isdir("models"):
         os.mkdir("models")
-    torch.save(agent, curr_dir + "/models/spacecraft_control_td3_home.pkl")
+    torch.save(agent, curr_dir + "/models/spacecraft_control_td3_rnd.pkl")
 
 def evaluate():
     # simulation of the agent solving the cartpole swing-up problem
