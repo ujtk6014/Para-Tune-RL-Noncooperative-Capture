@@ -17,10 +17,10 @@ def train():
     #logger
     wandb.init(project='Para-Tune-RL-SAC',
         config={
-        "batch_size": 64,
+        "batch_size": 32,
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
-        "alpha_lr": 1e-4,
+        "alpha_lr": 3e-4,
         "max_episodes": 5000,
         "max_steps": 500,
         "gamma": 0.99,
