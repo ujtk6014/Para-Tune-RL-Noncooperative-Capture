@@ -114,6 +114,7 @@ def evaluate():
     k_hist = []
     alpha_hist = []
     d_hist = np.empty((0,9))
+    skip_num = 5
 
     dt = 0.1
     simutime = 50
@@ -128,7 +129,8 @@ def evaluate():
 
     with tqdm(range(max_steps),leave=False) as pbar:
         for i, ch in enumerate(pbar):
-            action = agent.get_action(state)
+            if i % skip_num == 0:
+                action = agent.get_action(state)
             para_candi = (action + 1)/2
             #----------------control law (Adaptive controller)-----------------------
             k = para_candi[0]*k_max
