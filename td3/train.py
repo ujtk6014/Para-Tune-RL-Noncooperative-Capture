@@ -29,6 +29,8 @@ def train():
         "policy_freq": 2,
         "noise_clip": 0.5,
         "prioritized_on": False,
+        "state_skip_on": True,
+        "skip_num": 5,
         "State": 'angle:4, ang_rate:4, ang_vel:3, th_e:9',}
     )
     config = wandb.config
@@ -46,6 +48,12 @@ def train():
     tau = config.tau
     critic_lr = config.critic_lr
     actor_lr = config.actor_lr
+    
+    state_skip_on = config.state_skip_on
+    if state_skip_on:
+        skip_num =  config.skip_num
+    else:
+        skip_num = 1
 
     agent = TD3Agent(env, gamma, tau, buffer_maxlen, critic_lr, actor_lr, True, max_episodes * max_steps,
                     policy_freq, policy_noise, noise_clip)
@@ -54,7 +62,7 @@ def train():
     # curr_dir = os.path.abspath(os.getcwd())
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
 
-    episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size)
+    episode_rewards = mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, skip_num)
 
     #-------------------plot settings------------------------------
     plt.rcParams['font.family'] = 'Times New Roman' # font familyの設定
@@ -89,7 +97,7 @@ def evaluate():
     curr_dir = os.path.abspath(os.getcwd())
 
     # agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl")
-    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home_20210324.pkl",map_location='cpu')
+    agent = torch.load(curr_dir + "/models/spacecraft_control_td3_home.pkl",map_location='cpu')
     agent.device = torch.device('cpu')
     agent.train = False
 
@@ -467,7 +475,6 @@ def env_pd():
     plt.savefig(curr_dir + "/results/pd_test/plot_angle.png")
     plt.show()    
     #endregion
-
 def env_adaptive():
 
     # simulation of the agent solving the cartpole swing-up problem

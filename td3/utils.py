@@ -48,7 +48,7 @@ def mini_batch_train(env, agent, max_episodes, max_steps, batch_size):
 
     return episode_rewards
 
-def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
+def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size, skip_num):
     episode_rewards = []
     counter = 0
     k_max = 7
@@ -57,12 +57,14 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
     try:
         for episode in range(max_episodes):
             state = env.reset()
-            episode_reward = 0    
+            episode_reward = 0 
+            skip_reward = 0   
             th_e = np.array(env.inertia.flatten()*env.multi)
 
             for step in range(max_steps):
-                action = agent.get_action(state, (episode + 1) * (step + 1))
-                para_candi = (action + 1)/2
+                if step % skip_num == 0:
+                    action = agent.get_action(state, (episode + 1) * (step + 1))
+                    para_candi = (action + 1)/2
                 #----------------control law (Adaptive controller)-----------------------
                 # alpha = action[0]
                 # k = action[1]
@@ -86,7 +88,10 @@ def mini_batch_train_adaptive(env, agent, max_episodes, max_steps, batch_size):
                 # env.est_th = ([th_e[0],th_e[4],th_e[8]])/((env.max_multi+1)*np.diag(env.inertia))
                 #---------------------------------------------------------------------
                 next_error_state, reward, done, next_state, _ = env.step(input)
-                agent.replay_buffer.push(state, action, reward, next_error_state, done)
+                skip_reward += reward
+                if step % skip_num == 0:
+                    agent.replay_buffer.push(state, action, reward, next_error_state, done)
+                    skip_reward = 0
                 episode_reward += reward
 
                 # update the agent if enough transitions are stored in replay buffer
