@@ -17,7 +17,7 @@ def train():
     #logger
     wandb.init(project='Para-Tune-RL-SAC',
         config={
-        "batch_size": 256,
+        "batch_size": 64,
         "critic_lr": 1e-3,
         "actor_lr": 1e-4,
         "alpha_lr": 1e-4,
@@ -25,7 +25,7 @@ def train():
         "max_steps": 500,
         "gamma": 0.99,
         "tau" : 1e-3,
-        "alpha" :0.6,
+        "alpha" :0.4,
         "buffer_maxlen": 100000,
         "policy_type": "Gaussian",
         "target_update_interval": 2,
