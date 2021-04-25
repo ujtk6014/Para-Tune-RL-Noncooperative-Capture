@@ -114,7 +114,7 @@ def evaluate():
     k_hist = []
     alpha_hist = []
     d_hist = np.empty((0,9))
-    skip_num = 5
+    skip_num = int(input('Please enter number of skipping steps:'))
 
     dt = 0.1
     simutime = 50
@@ -145,13 +145,13 @@ def evaluate():
             Y = np.array([[alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[2], W[1]*W[2], W[2]*W[2], -W[0]*W[2], -W[1]*W[1], -W[1]*W[2]],
                 [-W[0]*W[2], -W[1]*W[2], -W[2]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3], W[0]*W[0], W[0]*W[1], W[0]*W[2]],
                 [W[0]*W[1], W[1]*W[1], W[1]*W[2], -W[0]*W[0], -W[0]*W[1], -W[0]*W[2], alpha*dqe[1], alpha*dqe[2], alpha*dqe[3]]])
-            input = -0.5*x1 -Y@th_e - k*x2
+            torque = -0.5*x1 -Y@th_e - k*x2
 
             dth = np.linalg.inv(D) @ Y.T @ x2
             th_e += env.dt*dth
             # env.est_th = ([th_e[0],th_e[4],th_e[8]]/np.diag(env.inertia) -1)/(env.max_multi-1)
             env.est_th = th_e.flatten()/25
-            next_error_state, reward, done, next_state, _ = env.step(input)
+            next_error_state, reward, done, next_state, _ = env.step(torque)
             # if i == 20/dt:
             #     env.inertia = env.inertia_comb
             #     env.inertia_inv = np.linalg.inv(env.inertia)
@@ -163,7 +163,7 @@ def evaluate():
             w=np.append(w,next_error_state[8:11].reshape(1,-1),axis=0)
             r += reward
             R = np.append(R,reward)
-            actions = np.append(actions, input.reshape(1,-1),axis=0)
+            actions = np.append(actions, torque.reshape(1,-1),axis=0)
             k_hist.append(k)
             alpha_hist.append(alpha)
             r_hist = np.append(r_hist, np.array([-env.r1,-env.r2,-env.r3,-env.r4]).reshape(1,-1),axis=0)
